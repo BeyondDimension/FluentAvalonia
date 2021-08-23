@@ -31,7 +31,7 @@ namespace FluentAvalonia.UI.Controls
             //PseudoClasses.Add(":headercollapsed");
             //PseudoClasses.Add(":backbuttoncollapsed");
             //PseudoClasses.Add(":expanded");
-                        
+
             TemplateSettings = new NavigationViewTemplateSettings();
 
             _sizeChangedRevoker = this.GetObservable(BoundsProperty).Subscribe(OnSizeChanged);
@@ -244,7 +244,7 @@ namespace FluentAvalonia.UI.Controls
                 _menuItemsScrollViewer = e.NameScope.Get<ScrollViewer>("MenuItemsScrollViewer");
                 _footerItemsScrollViewer = e.NameScope.Get<ScrollViewer>("FooterItemsScrollViewer");
 
-				_itemsContainer = e.NameScope.Find<IControl>("ItemsContainerGrid");
+                _itemsContainer = e.NameScope.Find<IControl>("ItemsContainerGrid");
                 if (_itemsContainerRow != null)
                 {
                     _itemsContainerSizeRevoker = _itemsContainer.GetObservable(BoundsProperty).Subscribe(OnItemsContainerSizeChanged);
@@ -266,7 +266,7 @@ namespace FluentAvalonia.UI.Controls
                 UpdateVisualState();
                 UpdatePaneTitleMargins();
                 UpdatePaneLayout();
-				UpdatePaneOverlayGroup();
+                UpdatePaneOverlayGroup();
 
                 //There's a slight difference in the way we have to do things vs WinUI
                 //This gets called from UpdatePaneDisplayMode(), but with arg = False
@@ -310,13 +310,13 @@ namespace FluentAvalonia.UI.Controls
         protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
         {
             base.OnPropertyChanged(change);
-            
+
             if (change.Property == CompactModeThresholdWidthProperty ||
                 change.Property == ExpandedModeThresholdWidthProperty)
             {
                 UpdateAdaptiveLayout(Bounds.Width);
             }
-            else if (change.Property == AlwaysShowHeaderProperty || 
+            else if (change.Property == AlwaysShowHeaderProperty ||
                 change.Property == HeaderProperty)
             {
                 UpdateHeaderVisibility();
@@ -335,7 +335,7 @@ namespace FluentAvalonia.UI.Controls
 
                 var oldValue = change.OldValue.GetValueOrDefault<NavigationViewPaneDisplayMode>();
                 var newValue = change.NewValue.GetValueOrDefault<NavigationViewPaneDisplayMode>();
-				
+
                 CollapseTopLevelMenuItems(oldValue);
                 UpdatePaneToggleButtonVisibility();
                 UpdatePaneDisplayMode(oldValue, newValue);
@@ -370,7 +370,7 @@ namespace FluentAvalonia.UI.Controls
                     //TODO: WinUI has SuggestionChosen event handler here, find compatible event...
                 }
 
-				UpdateVisualState();
+                UpdateVisualState();
             }
             //else if (change.Property == SelectionFollowsFocusProperty)
             //{
@@ -397,25 +397,25 @@ namespace FluentAvalonia.UI.Controls
             }
             //Skip IsTitleBarAutoPaddingEnabledProperty
             else if (change.Property == MenuItemTemplateProperty ||
-				change.Property == MenuItemTemplateSelectorProperty)
+                change.Property == MenuItemTemplateSelectorProperty)
             {
                 //SyncItemTemplates(); [This just calls UpdateNavigationViewItemsFactory, so why not just do that]
                 UpdateNavigationViewItemsFactory();
             }
-			else if (change.Property == PaneFooterProperty)
-			{
-				UpdatePaneLayout();
-			}
-			else if (change.Property == SelectedItemProperty)
-			{
-				OnSelectedItemPropertyChanged(change.OldValue.GetValueOrDefault(), change.NewValue.GetValueOrDefault());
-			}
+            else if (change.Property == PaneFooterProperty)
+            {
+                UpdatePaneLayout();
+            }
+            else if (change.Property == SelectedItemProperty)
+            {
+                OnSelectedItemPropertyChanged(change.OldValue.GetValueOrDefault(), change.NewValue.GetValueOrDefault());
+            }
         }
 
         //WinUI also uses PreviewKeyDown to reset m_TabKeyPrecedesFocusChange
         protected override void OnKeyDown(KeyEventArgs e)
         {
-			_tabKeyPrecedesFocusChange = false;
+            _tabKeyPrecedesFocusChange = false;
             switch (e.Key)
             {
                 case Key.Back:
@@ -435,171 +435,171 @@ namespace FluentAvalonia.UI.Controls
                     if (((e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt) && IsPaneOpen && IsLightDismissable)
                     {
                         e.Handled = AttemptClosePaneLightly();
-						break;
-					}
-					goto case Key.Up;
+                        break;
+                    }
+                    goto case Key.Up;
 
-				case Key.Up:
-				case Key.Down:
-				case Key.Right:
-					//Continued logic from the NVIKeyDown handler, to compensate for no XYKeyboardFocus
-					//we still want the arrow keys to work on the rest of the pane (panetogglebutton,
-					//autocompletebox, etc.) so if 'e' is not handled yet, we'll handle it here
+                case Key.Up:
+                case Key.Down:
+                case Key.Right:
+                    //Continued logic from the NVIKeyDown handler, to compensate for no XYKeyboardFocus
+                    //we still want the arrow keys to work on the rest of the pane (panetogglebutton,
+                    //autocompletebox, etc.) so if 'e' is not handled yet, we'll handle it here
 
-					if (e.Handled)
-						break;
+                    if (e.Handled)
+                        break;
 
-					bool isTopNav = IsTopNavigationView;
+                    bool isTopNav = IsTopNavigationView;
 
-					if (isTopNav && _topNavGrid == null)
-						break;
-					else if (!isTopNav && _paneContentGrid == null)
-						break;
+                    if (isTopNav && _topNavGrid == null)
+                        break;
+                    else if (!isTopNav && _paneContentGrid == null)
+                        break;
 
-					var current = FocusManager.Instance.Current;
-					
-					if (current == null)
-						break;
-							
-					//Make sure current focus is in the NavPane, we don't want to disturb content
-					//being displayed in the NavView						
-					if (!VerifyInPane(current, isTopNav ? _topNavGrid : _paneContentGrid))
-						break;
+                    var current = FocusManager.Instance.Current;
 
-					if ((isTopNav && e.Key == Key.Left) || (!isTopNav && e.Key == Key.Up))
-					{
-						var next = KeyboardNavigationHandler.GetNext(current, NavigationDirection.Previous);
-						if (next == null)
-							break;
+                    if (current == null)
+                        break;
 
-						//Next focus falls outside of the pane, don't focus it
-						if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
-							break;
+                    //Make sure current focus is in the NavPane, we don't want to disturb content
+                    //being displayed in the NavView						
+                    if (!VerifyInPane(current, isTopNav ? _topNavGrid : _paneContentGrid))
+                        break;
 
-						if (next is NavigationViewItem nvi)
-						{
-							var rep = GetParentItemsRepeaterForContainer(nvi);
-							//null check here b/c if NVIs are used in PaneFooter, it won't have an
-							//items repeater & we want default logic there
-							if (rep != null)
-							{
-								var ct = rep.ItemsSourceView.Count;
-								for (int i = ct - 1; i >= 0; i--)
-								{
-									if (rep.TryGetElement(i) is NavigationViewItem nvi2)
-									{
-										if (DoesNavigationViewItemHaveChildren(nvi2) && nvi2.IsExpanded && !SelectionFollowsFocus)
-										{
-											var item = SearchTreeForLowestFocusItem(nvi2);
-											if (item is NavigationViewItem c)
-											{
-												FocusManager.Instance.Focus(c, NavigationMethod.Directional);
-												c.BringIntoView();
-												e.Handled = true;
-												break;
-											}
-										}
-										else
-										{
-											FocusManager.Instance.Focus(nvi2, NavigationMethod.Directional);
-											nvi2.BringIntoView();
-											e.Handled = true;
-											break;
-										}										
-									}
-								}
-							}
-						}
+                    if ((isTopNav && e.Key == Key.Left) || (!isTopNav && e.Key == Key.Up))
+                    {
+                        var next = KeyboardNavigationHandler.GetNext(current, NavigationDirection.Previous);
+                        if (next == null)
+                            break;
 
-						if (!e.Handled)
-						{
-							FocusManager.Instance.Focus(next, NavigationMethod.Directional);
-							e.Handled = true;
-						}
-					}
-					else if ((isTopNav && e.Key == Key.Right) || (!isTopNav && e.Key == Key.Down))
-					{
-						var next = KeyboardNavigationHandler.GetNext(current, NavigationDirection.Next);
-						if (next == null)
-							break;
+                        //Next focus falls outside of the pane, don't focus it
+                        if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
+                            break;
 
-						//Next focus falls outside of the pane, don't focus it
-						if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
-							break;
+                        if (next is NavigationViewItem nvi)
+                        {
+                            var rep = GetParentItemsRepeaterForContainer(nvi);
+                            //null check here b/c if NVIs are used in PaneFooter, it won't have an
+                            //items repeater & we want default logic there
+                            if (rep != null)
+                            {
+                                var ct = rep.ItemsSourceView.Count;
+                                for (int i = ct - 1; i >= 0; i--)
+                                {
+                                    if (rep.TryGetElement(i) is NavigationViewItem nvi2)
+                                    {
+                                        if (DoesNavigationViewItemHaveChildren(nvi2) && nvi2.IsExpanded && !SelectionFollowsFocus)
+                                        {
+                                            var item = SearchTreeForLowestFocusItem(nvi2);
+                                            if (item is NavigationViewItem c)
+                                            {
+                                                FocusManager.Instance.Focus(c, NavigationMethod.Directional);
+                                                c.BringIntoView();
+                                                e.Handled = true;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            FocusManager.Instance.Focus(nvi2, NavigationMethod.Directional);
+                                            nvi2.BringIntoView();
+                                            e.Handled = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
-						if (next is NavigationViewItem nvi)
-						{
-							if (DoesNavigationViewItemHaveChildren(nvi) && nvi.IsExpanded)
-							{
-								var rep = nvi.GetRepeater;
-								if (rep != null && rep.TryGetElement(0) is NavigationViewItem nvi2)
-								{
-									FocusManager.Instance.Focus(nvi2, NavigationMethod.Directional);
-									nvi2.BringIntoView();
-									e.Handled = true;
-									break;
-								}
-							}
-						}
+                        if (!e.Handled)
+                        {
+                            FocusManager.Instance.Focus(next, NavigationMethod.Directional);
+                            e.Handled = true;
+                        }
+                    }
+                    else if ((isTopNav && e.Key == Key.Right) || (!isTopNav && e.Key == Key.Down))
+                    {
+                        var next = KeyboardNavigationHandler.GetNext(current, NavigationDirection.Next);
+                        if (next == null)
+                            break;
 
-						if (!e.Handled)
-						{
-							FocusManager.Instance.Focus(next, NavigationMethod.Directional);
-							e.Handled = true;
-						}
-					}
+                        //Next focus falls outside of the pane, don't focus it
+                        if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
+                            break;
+
+                        if (next is NavigationViewItem nvi)
+                        {
+                            if (DoesNavigationViewItemHaveChildren(nvi) && nvi.IsExpanded)
+                            {
+                                var rep = nvi.GetRepeater;
+                                if (rep != null && rep.TryGetElement(0) is NavigationViewItem nvi2)
+                                {
+                                    FocusManager.Instance.Focus(nvi2, NavigationMethod.Directional);
+                                    nvi2.BringIntoView();
+                                    e.Handled = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!e.Handled)
+                        {
+                            FocusManager.Instance.Focus(next, NavigationMethod.Directional);
+                            e.Handled = true;
+                        }
+                    }
 
 
-					//NavigationDirection dir = NavigationDirection.Next;
-					//if (IsTopNavigationView)
-					//{
-					//	dir = e.Key == Key.Left ? NavigationDirection.Previous : NavigationDirection.Next;
-					//}
-					//else
-					//{
-					//	dir = e.Key == Key.Up ? NavigationDirection.Previous : NavigationDirection.Next;
-					//}
+                    //NavigationDirection dir = NavigationDirection.Next;
+                    //if (IsTopNavigationView)
+                    //{
+                    //	dir = e.Key == Key.Left ? NavigationDirection.Previous : NavigationDirection.Next;
+                    //}
+                    //else
+                    //{
+                    //	dir = e.Key == Key.Up ? NavigationDirection.Previous : NavigationDirection.Next;
+                    //}
 
-					//var next = KeyboardNavigationHandler.GetNext(current, dir);
-					//if (next != null)
-					//{
-					//	//Next focus falls outside of the pane, don't focus it
-					//	if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
-					//		break;
+                    //var next = KeyboardNavigationHandler.GetNext(current, dir);
+                    //if (next != null)
+                    //{
+                    //	//Next focus falls outside of the pane, don't focus it
+                    //	if (!VerifyInPane(next, isTopNav ? _topNavGrid : _paneContentGrid))
+                    //		break;
 
-					//	if (next is NavigationViewItem nvi)
-					//	{
-					//		var rep = GetParentItemsRepeaterForContainer(nvi);
-					//		//null check here b/c if NVIs are used in PaneFooter, it won't have an
-					//		//items repeater & we want default logic there
-					//		if (rep != null)
-					//		{
-					//			var ct = rep.ItemsSourceView.Count;
-					//			for (int i = ct - 1; i >= 0; i--)
-					//			{
-					//				if (rep.TryGetElement(i) is NavigationViewItem nvi2)
-					//				{
-					//					var item = SearchTreeForLowestFocusItem(nvi2);
-					//					if (item is NavigationViewItem c)
-					//					{
-					//						FocusManager.Instance.Focus(c, NavigationMethod.Directional);
-					//						c.BringIntoView();
-					//						e.Handled = true;
-					//						break;
-					//					}
-					//				}
-					//			}
-					//		}
-					//	}
+                    //	if (next is NavigationViewItem nvi)
+                    //	{
+                    //		var rep = GetParentItemsRepeaterForContainer(nvi);
+                    //		//null check here b/c if NVIs are used in PaneFooter, it won't have an
+                    //		//items repeater & we want default logic there
+                    //		if (rep != null)
+                    //		{
+                    //			var ct = rep.ItemsSourceView.Count;
+                    //			for (int i = ct - 1; i >= 0; i--)
+                    //			{
+                    //				if (rep.TryGetElement(i) is NavigationViewItem nvi2)
+                    //				{
+                    //					var item = SearchTreeForLowestFocusItem(nvi2);
+                    //					if (item is NavigationViewItem c)
+                    //					{
+                    //						FocusManager.Instance.Focus(c, NavigationMethod.Directional);
+                    //						c.BringIntoView();
+                    //						e.Handled = true;
+                    //						break;
+                    //					}
+                    //				}
+                    //			}
+                    //		}
+                    //	}
 
-					//	if (!e.Handled)
-					//	{
-					//		FocusManager.Instance.Focus(next, NavigationMethod.Directional);
-					//		e.Handled = true;
-					//	}
-					//}
+                    //	if (!e.Handled)
+                    //	{
+                    //		FocusManager.Instance.Focus(next, NavigationMethod.Directional);
+                    //		e.Handled = true;
+                    //	}
+                    //}
 
-					break;
+                    break;
             }
 
             base.OnKeyDown(e);
@@ -677,7 +677,7 @@ namespace FluentAvalonia.UI.Controls
 
             //if (_menuItemsSource != null)
             //    _menuItemsSource.CollectionChanged -= OnMenuItemsSourceCollectionChanged;
-            
+
             //We don't need to do this b/c we don't have MenuItemsSource, just MenuItems
             //and MenuItems is IEnumerable already (we'll still subscribe if INCC, but that's
             //handled in the Property itself
@@ -837,17 +837,17 @@ namespace FluentAvalonia.UI.Controls
                 {
                     UpdateItemsRepeaterItemsSource(_leftNavFooterMenuRepeater, _selectionModelSource[1] as IEnumerable);
 
-					// Footer items changed and we need to recalculate the layout.
-					// However repeater "lags" behind, so we need to force it to reevaluate itself now.
-					_leftNavFooterMenuRepeater.InvalidateMeasure();
-					_leftNavFooterMenuRepeater.InvalidateArrange();
-					//_leftNavFooterMenuRepeater.UpdateLayout();
+                    // Footer items changed and we need to recalculate the layout.
+                    // However repeater "lags" behind, so we need to force it to reevaluate itself now.
+                    _leftNavFooterMenuRepeater.InvalidateMeasure();
+                    _leftNavFooterMenuRepeater.InvalidateArrange();
+                    //_leftNavFooterMenuRepeater.UpdateLayout();
 
                     // Footer items changed, so let's update the pane layout
                     UpdatePaneLayout();
                 }
 
-				_settingsItem?.BringIntoView();
+                _settingsItem?.BringIntoView();
             }
         }
 
@@ -914,7 +914,7 @@ namespace FluentAvalonia.UI.Controls
             {
                 nvib.Depth = 0;
                 nvib.IsTopLevelItem = false;
-                
+
                 if (nvib is NavigationViewItem nvi)
                 {
                     nvi.Tapped -= OnNavigationViewItemTapped;
@@ -942,14 +942,14 @@ namespace FluentAvalonia.UI.Controls
 
         private void UpdateNavigationViewItemsFactory()
         {
-			if (MenuItemTemplate == null)
-			{
-				_itemsFactory.UserElementFactory(MenuItemTemplateSelector);
-			}
-			else
-			{
-				_itemsFactory.UserElementFactory(MenuItemTemplate);
-			}
+            if (MenuItemTemplate == null)
+            {
+                _itemsFactory.UserElementFactory(MenuItemTemplateSelector);
+            }
+            else
+            {
+                _itemsFactory.UserElementFactory(MenuItemTemplate);
+            }
         }
 
 
@@ -1025,9 +1025,9 @@ namespace FluentAvalonia.UI.Controls
             ChangeSelection(oldItem, newItem);
 
             if (_appliedTemplate && IsTopNavigationView)
-            {               
+            {
                 //Also checks for LayoutUpdatedToken == null
-                if (newItem != null && _topDataProvider.IndexOf(newItem) != _itemNotFound && 
+                if (newItem != null && _topDataProvider.IndexOf(newItem) != _itemNotFound &&
                     _topDataProvider.IndexOf(newItem, NavigationViewSplitVectorID.PrimaryList) == _itemNotFound) // selection is in overflow
                 {
                     InvalidateTopNavPrimaryLayout();
@@ -1063,11 +1063,11 @@ namespace FluentAvalonia.UI.Controls
             UpdatePaneTabFocusNavigation();
             UpdateSettingsItemToolTip();
             UpdatePaneTitleFrameworkElementParents();
-			UpdatePaneOverlayGroup();
+            UpdatePaneOverlayGroup();
             UpdatePaneButtonWidths();
         }
 
-        
+
 
 
 
@@ -1111,7 +1111,7 @@ namespace FluentAvalonia.UI.Controls
             // 2. Template has not been applied yet. SelectionModel's selectedIndex state will get properly updated
             //    after the repeater finishes loading.
             // TODO: Update SelectedItem comparison to work for the exact same item datasource scenario
-            if (_shouldIgnoreNextSelectionChange || selItem == SelectedItem || !_appliedTemplate)
+            if (_shouldIgnoreNextSelectionChange || selItem == null || selItem == SelectedItem || !_appliedTemplate)
             {
                 return;
             }
@@ -1476,7 +1476,7 @@ namespace FluentAvalonia.UI.Controls
                 // calculate items to be removed from primary because a overflow item is selected. 
                 // SelectedItem is assumed to be removed from primary first, then added it back if it should not be removed
                 var itemsToBeRemoved = FindMovableItemsToBeRemovedFromPrimaryList(widthAtLeastToBeRemoved, new List<int>(0));
-                
+
                 // calculate the size to be removed
                 var topBeRemovedItemWidth = _topDataProvider.CalculateWidthForItems(itemsToBeRemoved);
 
@@ -1687,7 +1687,7 @@ namespace FluentAvalonia.UI.Controls
         private void OnNavigationViewItemInvoked(NavigationViewItem nvi)
         {
             _shouldRaiseItemInvokedAfterSelection = true;
-			var selItem = SelectedItem;
+            var selItem = SelectedItem;
             bool updateSelection = _selectionModel != null && nvi.SelectsOnInvoked;
 
             if (updateSelection)
@@ -1721,11 +1721,11 @@ namespace FluentAvalonia.UI.Controls
         {
             var nvi = (NavigationViewItem)sender;
 
-			//In WinUI, Focus isn't given to an item until AFTER the Tapped event, which differs
-			//from how Avalonia handles it. Which means here, this is called first, and the NVI
-			//hasn't yet been selected, which means OnNVIInvoked gets called twice and will open
-			//and close an item if it has child items. So disable here if focus was given via
-			//the pointer to prevent that from occuring
+            //In WinUI, Focus isn't given to an item until AFTER the Tapped event, which differs
+            //from how Avalonia handles it. Which means here, this is called first, and the NVI
+            //hasn't yet been selected, which means OnNVIInvoked gets called twice and will open
+            //and close an item if it has child items. So disable here if focus was given via
+            //the pointer to prevent that from occuring
             if (SelectionFollowsFocus && e.NavigationMethod != NavigationMethod.Pointer)
             {
                 // if nvi is already selected we don't need to invoke it again
@@ -1781,8 +1781,8 @@ namespace FluentAvalonia.UI.Controls
 
         private void HandleKeyEventForNavigationViewItem(NavigationViewItem nvi, KeyEventArgs args)
         {
-			//NOTE: Key logic diverges from WinUI to compensate for the lack of
-			//      XYKeyboardFocus in Avalonia, which handles most of the logic
+            //NOTE: Key logic diverges from WinUI to compensate for the lack of
+            //      XYKeyboardFocus in Avalonia, which handles most of the logic
             switch (args.Key)
             {
                 case Key.Enter:
@@ -1801,24 +1801,24 @@ namespace FluentAvalonia.UI.Controls
                     KeyboardFocusLastItemFromItem(nvi);
                     break;
 
-				case Key.Right:
-					if (IsTopNavigationView)
-						FocusNextDownItem(nvi, args);
-					break;
-
-                case Key.Down: //next item or subitem down
-					if (!IsTopNavigationView)
-						FocusNextDownItem(nvi, args);
+                case Key.Right:
+                    if (IsTopNavigationView)
+                        FocusNextDownItem(nvi, args);
                     break;
 
-				case Key.Left:
-					if (IsTopNavigationView)
-						FocusNextUpItem(nvi, args);
-					break;
+                case Key.Down: //next item or subitem down
+                    if (!IsTopNavigationView)
+                        FocusNextDownItem(nvi, args);
+                    break;
 
-				case Key.Up: //next item or subitem up
-					if (!IsTopNavigationView)
-						FocusNextUpItem(nvi, args);
+                case Key.Left:
+                    if (IsTopNavigationView)
+                        FocusNextUpItem(nvi, args);
+                    break;
+
+                case Key.Up: //next item or subitem up
+                    if (!IsTopNavigationView)
+                        FocusNextUpItem(nvi, args);
                     break;
             }
         }
@@ -1830,7 +1830,7 @@ namespace FluentAvalonia.UI.Controls
             if (firstElement != null)
             {
                 FocusManager.Instance?.Focus(firstElement, NavigationMethod.Directional);
-				firstElement.BringIntoView();
+                firstElement.BringIntoView();
             }
         }
 
@@ -1843,228 +1843,228 @@ namespace FluentAvalonia.UI.Controls
                 if (parentIR.TryGetElement(lastIndex) is Control c)
                 {
                     FocusManager.Instance?.Focus(c, NavigationMethod.Directional);
-					c.BringIntoView();
+                    c.BringIntoView();
                 }
             }
         }
 
         private void FocusNextUpItem(NavigationViewItem nvi, KeyEventArgs args)
         {
-			//This is a bit more complex than focusing down b/c default logic will focus the first
-			//item in the Primary repeater if coming from Footer items so we need to make sure that
-			//doesn't happen and we focus the last visible item
+            //This is a bit more complex than focusing down b/c default logic will focus the first
+            //item in the Primary repeater if coming from Footer items so we need to make sure that
+            //doesn't happen and we focus the last visible item
 
-			var parentRepeater = GetParentItemsRepeaterForContainer(nvi);
-			var rootRep = GetParentRootItemsRepeaterForContainer(nvi);
-			var index = parentRepeater.GetElementIndex(nvi);
+            var parentRepeater = GetParentItemsRepeaterForContainer(nvi);
+            var rootRep = GetParentRootItemsRepeaterForContainer(nvi);
+            var index = parentRepeater.GetElementIndex(nvi);
 
-			//Top of repeater, let NavigationView.OnKeyDown handle this
-			if (rootRep == parentRepeater && index == 0)
-				return;
+            //Top of repeater, let NavigationView.OnKeyDown handle this
+            if (rootRep == parentRepeater && index == 0)
+                return;
 
-			//We're at the top of a child repeater, focus parent item
-			if (index == 0)
-			{
-				var parent = GetParentNavigationViewItemForContainer(nvi);
-				FocusManager.Instance?.Focus(parent, NavigationMethod.Directional);
-				args.Handled = true;
-				parent.BringIntoView();
-				return;
-			}
+            //We're at the top of a child repeater, focus parent item
+            if (index == 0)
+            {
+                var parent = GetParentNavigationViewItemForContainer(nvi);
+                FocusManager.Instance?.Focus(parent, NavigationMethod.Directional);
+                args.Handled = true;
+                parent.BringIntoView();
+                return;
+            }
 
-			for (int i = index - 1; i >= 0; i--)
-			{
-				if (parentRepeater.TryGetElement(i) is NavigationViewItem prevItem)
-				{
-					if (DoesNavigationViewItemHaveChildren(prevItem) && prevItem.IsExpanded && !SelectionFollowsFocus)
-					{
-						var check = SearchTreeForLowestFocusItem(prevItem);
-						if (check != null)
-						{
-							FocusManager.Instance?.Focus(check, NavigationMethod.Directional);
-							args.Handled = true;
-							check.BringIntoView();
-							return;
-						}
-					}
-					else
-					{
-						FocusManager.Instance?.Focus(prevItem, NavigationMethod.Directional);
-						args.Handled = true;
-						prevItem.BringIntoView();
-						return;
-					}
-				}
-			}
-
-
-			//if (parentRepeater == rootRep && index == 0) 
-			//{
-			//	//Toplevel item, we're either jumping from footer to 
-			//}
-			//else
-			//{				
-			//	if (index == 0)
-			//	{
-			//		nvi = GetParentNavigationViewItemForContainer(nvi);
-			//		FocusNextUpItem(nvi, args);
-			//	}
-			//	else
-			//	{
-					
-
-			//		for (int i = index - 1; index >= 0; i--)
-			//		{
-			//			if (parentRepeater.TryGetElement(i) is NavigationViewItem nvi2)
-			//			{
-			//				if (DoesNavigationViewItemHaveChildren(nvi2) && nvi2.IsExpanded)
-			//				{
-			//					// Item is expanded, we need to traverse its tree to find the lowest
-			//					//container that's focusable
-
-			//					var possItem = SearchTreeForLowestFocusItem(nvi2);
-			//					if (possItem != null)
-			//					{
-			//						FocusManager.Instance?.Focus(possItem, NavigationMethod.Directional);
-			//						args.Handled = true;
-			//						possItem.BringIntoView();
-			//						return;
-			//					}
-			//				}
-			//				else
-			//				{
-			//					FocusManager.Instance?.Focus(nvi2, NavigationMethod.Directional);
-			//					args.Handled = true;
-			//					nvi2.BringIntoView();
-			//					return;
-			//				}
-			//			}
-			//		}
-			//	}
-			//}
-
-			//var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Previous) as IControl;
-			////WinUI relies on XYKeyboardNav here, so we use our logic
-			//if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
-			//	return;
-
-			//FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
-			//next.BringIntoView();
-			//args.Handled = true;
+            for (int i = index - 1; i >= 0; i--)
+            {
+                if (parentRepeater.TryGetElement(i) is NavigationViewItem prevItem)
+                {
+                    if (DoesNavigationViewItemHaveChildren(prevItem) && prevItem.IsExpanded && !SelectionFollowsFocus)
+                    {
+                        var check = SearchTreeForLowestFocusItem(prevItem);
+                        if (check != null)
+                        {
+                            FocusManager.Instance?.Focus(check, NavigationMethod.Directional);
+                            args.Handled = true;
+                            check.BringIntoView();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        FocusManager.Instance?.Focus(prevItem, NavigationMethod.Directional);
+                        args.Handled = true;
+                        prevItem.BringIntoView();
+                        return;
+                    }
+                }
+            }
 
 
+            //if (parentRepeater == rootRep && index == 0) 
+            //{
+            //	//Toplevel item, we're either jumping from footer to 
+            //}
+            //else
+            //{				
+            //	if (index == 0)
+            //	{
+            //		nvi = GetParentNavigationViewItemForContainer(nvi);
+            //		FocusNextUpItem(nvi, args);
+            //	}
+            //	else
+            //	{
 
-			//         bool shouldHandleFocus = true;
-			//         var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Previous) as IControl;
 
-			//if (next is NavigationViewItem nextNVI)
-			//         {
-			//             if (nextNVI.Depth == nvi.Depth)
-			//             {
-			//                 // If we not at the top of the list for our current depth and the item above us has children, check whether we should move focus onto a child
-			//                 if (DoesNavigationViewItemHaveChildren(nextNVI))
-			//                 {
-			//                     // Focus on last lowest level visible container
-			//                     var childRepeater = nextNVI.GetRepeater;
-			//                     if (childRepeater != null)
-			//                     {
-			//                         //FocusManager.FindLastFocusableElement...
-			//                         var ct = childRepeater.ItemsSourceView?.Count ?? 0;
-			//                         for (int i = ct - 1; i >= 0; i--)
-			//                         {
-			//                             if (childRepeater.TryGetElement(i) is IControl c && c.Focusable)
-			//                             {
-			//                                 FocusManager.Instance?.Focus(c, NavigationMethod.Directional);
-			//                                 args.Handled = FocusManager.Instance?.Current == c;
-			//                                 break;
-			//                             }
-			//                         }
+            //		for (int i = index - 1; index >= 0; i--)
+            //		{
+            //			if (parentRepeater.TryGetElement(i) is NavigationViewItem nvi2)
+            //			{
+            //				if (DoesNavigationViewItemHaveChildren(nvi2) && nvi2.IsExpanded)
+            //				{
+            //					// Item is expanded, we need to traverse its tree to find the lowest
+            //					//container that's focusable
 
-			//                         if (!args.Handled)
-			//                         {
-			//                             FocusManager.Instance?.Focus(nextNVI, NavigationMethod.Directional);
-			//                             args.Handled = FocusManager.Instance?.Current == nextNVI;
-			//                         }
-			//                     }
-			//                 }
-			//                 else
-			//                 {
-			//			//WinUI relies on XYKeyboardNav here, so we use our logic
-			//			if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
-			//				return;
+            //					var possItem = SearchTreeForLowestFocusItem(nvi2);
+            //					if (possItem != null)
+            //					{
+            //						FocusManager.Instance?.Focus(possItem, NavigationMethod.Directional);
+            //						args.Handled = true;
+            //						possItem.BringIntoView();
+            //						return;
+            //					}
+            //				}
+            //				else
+            //				{
+            //					FocusManager.Instance?.Focus(nvi2, NavigationMethod.Directional);
+            //					args.Handled = true;
+            //					nvi2.BringIntoView();
+            //					return;
+            //				}
+            //			}
+            //		}
+            //	}
+            //}
 
-			//			FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
-			//			next.BringIntoView();
-			//			args.Handled = true;
-			//			shouldHandleFocus = false;
-			//                 }
-			//             }
-			//         }
+            //var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Previous) as IControl;
+            ////WinUI relies on XYKeyboardNav here, so we use our logic
+            //if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
+            //	return;
 
-			//         // We are at the top of the list, focus on parent
-			//         if (shouldHandleFocus && !args.Handled && nvi.Depth > 0)
-			//         {
-			//             var parent = GetParentNavigationViewItemForContainer(nvi);
-			//             if (parent != null)
-			//             {
-			//                 FocusManager.Instance?.Focus(parent, NavigationMethod.Directional);
-			//                 args.Handled = FocusManager.Instance?.Current == parent;
-			//             }
-			//         }
-		}
+            //FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
+            //next.BringIntoView();
+            //args.Handled = true;
 
-		private void FocusNextDownItem(NavigationViewItem nvi, KeyEventArgs args)
-		{
-			if (DoesNavigationViewItemHaveChildren(nvi) && nvi.IsExpanded && !SelectionFollowsFocus)
-			{
-				var ir = nvi.GetRepeater;
-				var ct = ir.ItemsSourceView.Count;
-				for (int i = 0; i < ct; i++)
-				{
-					if (ir.TryGetElement(i) is IControl c && c.Focusable)
-					{
-						FocusManager.Instance?.Focus(c, NavigationMethod.Directional);
-						c.BringIntoView();
-						args.Handled = true;
-						return;
-					}
-				}
 
-			}
-			else
-			{
-				var parentIR = GetParentItemsRepeaterForContainer(nvi);
-				var index = parentIR.GetElementIndex(nvi);
-				if (index != -1)
-				{
-					index++;
-					var count = parentIR.ItemsSourceView.Count - 1;
-					while (index <= count)
-					{
-						if (parentIR.TryGetElement(index) is NavigationViewItem nvi2)
-						{
-							FocusManager.Instance?.Focus(nvi2, NavigationMethod.Directional);
-							nvi2.BringIntoView();
-							args.Handled = true;
-							return;
-						}
-						index++;
-					}
-				}
-			}
 
-			//We couldn't find another item to focus, move to next part of pane (this will also handle
-			//the jump from Primary items to footer)
-			var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Next) as IControl;
-			if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
-				return;
+            //         bool shouldHandleFocus = true;
+            //         var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Previous) as IControl;
 
-			FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
-			next.BringIntoView();
-			args.Handled = true;
-		}
+            //if (next is NavigationViewItem nextNVI)
+            //         {
+            //             if (nextNVI.Depth == nvi.Depth)
+            //             {
+            //                 // If we not at the top of the list for our current depth and the item above us has children, check whether we should move focus onto a child
+            //                 if (DoesNavigationViewItemHaveChildren(nextNVI))
+            //                 {
+            //                     // Focus on last lowest level visible container
+            //                     var childRepeater = nextNVI.GetRepeater;
+            //                     if (childRepeater != null)
+            //                     {
+            //                         //FocusManager.FindLastFocusableElement...
+            //                         var ct = childRepeater.ItemsSourceView?.Count ?? 0;
+            //                         for (int i = ct - 1; i >= 0; i--)
+            //                         {
+            //                             if (childRepeater.TryGetElement(i) is IControl c && c.Focusable)
+            //                             {
+            //                                 FocusManager.Instance?.Focus(c, NavigationMethod.Directional);
+            //                                 args.Handled = FocusManager.Instance?.Current == c;
+            //                                 break;
+            //                             }
+            //                         }
 
-		private void OnNavigationViewItemTapped(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+            //                         if (!args.Handled)
+            //                         {
+            //                             FocusManager.Instance?.Focus(nextNVI, NavigationMethod.Directional);
+            //                             args.Handled = FocusManager.Instance?.Current == nextNVI;
+            //                         }
+            //                     }
+            //                 }
+            //                 else
+            //                 {
+            //			//WinUI relies on XYKeyboardNav here, so we use our logic
+            //			if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
+            //				return;
+
+            //			FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
+            //			next.BringIntoView();
+            //			args.Handled = true;
+            //			shouldHandleFocus = false;
+            //                 }
+            //             }
+            //         }
+
+            //         // We are at the top of the list, focus on parent
+            //         if (shouldHandleFocus && !args.Handled && nvi.Depth > 0)
+            //         {
+            //             var parent = GetParentNavigationViewItemForContainer(nvi);
+            //             if (parent != null)
+            //             {
+            //                 FocusManager.Instance?.Focus(parent, NavigationMethod.Directional);
+            //                 args.Handled = FocusManager.Instance?.Current == parent;
+            //             }
+            //         }
+        }
+
+        private void FocusNextDownItem(NavigationViewItem nvi, KeyEventArgs args)
+        {
+            if (DoesNavigationViewItemHaveChildren(nvi) && nvi.IsExpanded && !SelectionFollowsFocus)
+            {
+                var ir = nvi.GetRepeater;
+                var ct = ir.ItemsSourceView.Count;
+                for (int i = 0; i < ct; i++)
+                {
+                    if (ir.TryGetElement(i) is IControl c && c.Focusable)
+                    {
+                        FocusManager.Instance?.Focus(c, NavigationMethod.Directional);
+                        c.BringIntoView();
+                        args.Handled = true;
+                        return;
+                    }
+                }
+
+            }
+            else
+            {
+                var parentIR = GetParentItemsRepeaterForContainer(nvi);
+                var index = parentIR.GetElementIndex(nvi);
+                if (index != -1)
+                {
+                    index++;
+                    var count = parentIR.ItemsSourceView.Count - 1;
+                    while (index <= count)
+                    {
+                        if (parentIR.TryGetElement(index) is NavigationViewItem nvi2)
+                        {
+                            FocusManager.Instance?.Focus(nvi2, NavigationMethod.Directional);
+                            nvi2.BringIntoView();
+                            args.Handled = true;
+                            return;
+                        }
+                        index++;
+                    }
+                }
+            }
+
+            //We couldn't find another item to focus, move to next part of pane (this will also handle
+            //the jump from Primary items to footer)
+            var next = KeyboardNavigationHandler.GetNext(nvi, NavigationDirection.Next) as IControl;
+            if (!VerifyInPane(next, IsTopNavigationView ? _topNavGrid : _paneContentGrid))
+                return;
+
+            FocusManager.Instance?.Focus(next, NavigationMethod.Directional);
+            next.BringIntoView();
+            args.Handled = true;
+        }
+
+        private void OnNavigationViewItemTapped(object sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             var nvi = (NavigationViewItem)sender;
             OnNavigationViewItemInvoked(nvi);
@@ -2242,31 +2242,31 @@ namespace FluentAvalonia.UI.Controls
             {
                 if (_itemsContainerRow != null)
                 {
-					double itemsContMargin = _itemsContainer?.Margin.Vertical() ?? 0d;
-					var availHgt = _itemsContainerRow.ActualHeight - itemsContMargin;
+                    double itemsContMargin = _itemsContainer?.Margin.Vertical() ?? 0d;
+                    var availHgt = _itemsContainerRow.ActualHeight - itemsContMargin;
 
-					return _itemsContainerRow.ActualHeight - itemsContMargin;
+                    return _itemsContainerRow.ActualHeight - itemsContMargin;
 
-					//// The c_paneItemsSeparatorHeight is to account for the 9px separator height that we need to subtract.
-					//if (PaneFooter != null)
-					//{
-					//	availHgt -= _paneItemsSeparatorHeight;
-					//	if (_leftNavFooterContentBorder != null)
-					//	{
-					//		availHgt -= _leftNavFooterContentBorder.Bounds.Height;
-					//	}
-					//}
-					//else if (IsSettingsVisible)
-					//{
-					//	availHgt -= _paneItemsSeparatorHeight;
-					//}
-					//else if (_footerMenuItems != null && _menuItems != null &&
-					//	_footerMenuItems.Count() * _menuItems.Count() > 0)
-					//{
-					//	availHgt -= _paneItemsSeparatorHeight;
-					//}
+                    //// The c_paneItemsSeparatorHeight is to account for the 9px separator height that we need to subtract.
+                    //if (PaneFooter != null)
+                    //{
+                    //	availHgt -= _paneItemsSeparatorHeight;
+                    //	if (_leftNavFooterContentBorder != null)
+                    //	{
+                    //		availHgt -= _leftNavFooterContentBorder.Bounds.Height;
+                    //	}
+                    //}
+                    //else if (IsSettingsVisible)
+                    //{
+                    //	availHgt -= _paneItemsSeparatorHeight;
+                    //}
+                    //else if (_footerMenuItems != null && _menuItems != null &&
+                    //	_footerMenuItems.Count() * _menuItems.Count() > 0)
+                    //{
+                    //	availHgt -= _paneItemsSeparatorHeight;
+                    //}
 
-					//return availHgt;
+                    //return availHgt;
                 }
                 return 0;
             }
@@ -2288,70 +2288,70 @@ namespace FluentAvalonia.UI.Controls
                             // We know the actual height of footer items, so use that to determine how to split pane.
                             if (_leftNavRepeater != null)
                             {
-								double footerActualHeight =
-									_leftNavFooterMenuRepeater.Bounds.Height + (_leftNavFooterMenuRepeater.IsVisible ?
-									_leftNavFooterMenuRepeater.Margin.Vertical() : 0);
-								
-								double paneFooterActualHeight =
-									_leftNavFooterContentBorder != null ?
-									(_leftNavFooterContentBorder.Bounds.Height +
-											(_leftNavFooterContentBorder.IsVisible ? _leftNavFooterContentBorder.Margin.Vertical() : 0)) :
-									0.0;
-								
+                                double footerActualHeight =
+                                    _leftNavFooterMenuRepeater.Bounds.Height + (_leftNavFooterMenuRepeater.IsVisible ?
+                                    _leftNavFooterMenuRepeater.Margin.Vertical() : 0);
 
-								// This is the value computed during the measure pass of the layout process. This will be the value used to determine
-								// the partition logic between menuItems and footerGroup, since the ActualHeight may be taller if there's more space.
-								var menuItemsDesiredHeight = _leftNavRepeater.DesiredSize.Height;
+                                double paneFooterActualHeight =
+                                    _leftNavFooterContentBorder != null ?
+                                    (_leftNavFooterContentBorder.Bounds.Height +
+                                            (_leftNavFooterContentBorder.IsVisible ? _leftNavFooterContentBorder.Margin.Vertical() : 0)) :
+                                    0.0;
 
-								// This is what the height ended up being, so will be the value that is used to calculate the partition
-								// between menuItems and footerGroup.
-								double menuItemsActualHeight =
-									_leftNavRepeater.Bounds.Height + (_leftNavRepeater.IsVisible ?
-										_leftNavRepeater.Margin.Vertical() : 0);
 
-								// Footer and PaneFooter are included in the footerGroup to calculate available height for menu items.
-								var footerGroupActualHeight = footerActualHeight + paneFooterActualHeight;
+                                // This is the value computed during the measure pass of the layout process. This will be the value used to determine
+                                // the partition logic between menuItems and footerGroup, since the ActualHeight may be taller if there's more space.
+                                var menuItemsDesiredHeight = _leftNavRepeater.DesiredSize.Height;
 
-								if ((_footerMenuItems != null && _footerMenuItems.Count() == 0) && !IsSettingsVisible)
-								{
-									PseudoClasses.Set(":separator", false);
-									return totalHeight;
-								}
-								else if (_menuItems != null && _menuItems.Count() == 0)
-								{
-									_footerItemsScrollViewer.MaxHeight = totalHeight;
-									PseudoClasses.Set(":separator", false);
-									return 0d;
-								}
-								else if (totalHeight >= menuItemsDesiredHeight + footerGroupActualHeight)
-								{
-									// We have enough space for two so let everyone get as much as they need
-									_footerItemsScrollViewer.MaxHeight = footerActualHeight;
-									PseudoClasses.Set(":separator", false);
-									return totalHeight - footerGroupActualHeight;
-								}
-								else if (menuItemsDesiredHeight < totalHeightHalf)
-								{
-									// Footer items exceed over the half, so let's limit them.
-									_footerItemsScrollViewer.MaxHeight = (totalHeight - menuItemsActualHeight);
-									PseudoClasses.Set(":separator", true);
-									return menuItemsActualHeight;
-								}
-								else if (footerGroupActualHeight <= totalHeightHalf)
-								{
-									// Menu items exceed over the half, so let's limit them.
-									_footerItemsScrollViewer.MaxHeight = footerActualHeight;
-									PseudoClasses.Set(":separator", true);
-									return totalHeight - footerGroupActualHeight;
-								}
-								else
-								{
-									// Both are more than half the height, so split evenly.
-									_footerItemsScrollViewer.MaxHeight = (totalHeightHalf);
-									PseudoClasses.Set(":separator", true);
-									return totalHeightHalf;
-								}
-							}
+                                // This is what the height ended up being, so will be the value that is used to calculate the partition
+                                // between menuItems and footerGroup.
+                                double menuItemsActualHeight =
+                                    _leftNavRepeater.Bounds.Height + (_leftNavRepeater.IsVisible ?
+                                        _leftNavRepeater.Margin.Vertical() : 0);
+
+                                // Footer and PaneFooter are included in the footerGroup to calculate available height for menu items.
+                                var footerGroupActualHeight = footerActualHeight + paneFooterActualHeight;
+
+                                if ((_footerMenuItems != null && _footerMenuItems.Count() == 0) && !IsSettingsVisible)
+                                {
+                                    PseudoClasses.Set(":separator", false);
+                                    return totalHeight;
+                                }
+                                else if (_menuItems != null && _menuItems.Count() == 0)
+                                {
+                                    _footerItemsScrollViewer.MaxHeight = totalHeight;
+                                    PseudoClasses.Set(":separator", false);
+                                    return 0d;
+                                }
+                                else if (totalHeight >= menuItemsDesiredHeight + footerGroupActualHeight)
+                                {
+                                    // We have enough space for two so let everyone get as much as they need
+                                    _footerItemsScrollViewer.MaxHeight = footerActualHeight;
+                                    PseudoClasses.Set(":separator", false);
+                                    return totalHeight - footerGroupActualHeight;
+                                }
+                                else if (menuItemsDesiredHeight < totalHeightHalf)
+                                {
+                                    // Footer items exceed over the half, so let's limit them.
+                                    _footerItemsScrollViewer.MaxHeight = (totalHeight - menuItemsActualHeight);
+                                    PseudoClasses.Set(":separator", true);
+                                    return menuItemsActualHeight;
+                                }
+                                else if (footerGroupActualHeight <= totalHeightHalf)
+                                {
+                                    // Menu items exceed over the half, so let's limit them.
+                                    _footerItemsScrollViewer.MaxHeight = footerActualHeight;
+                                    PseudoClasses.Set(":separator", true);
+                                    return totalHeight - footerGroupActualHeight;
+                                }
+                                else
+                                {
+                                    // Both are more than half the height, so split evenly.
+                                    _footerItemsScrollViewer.MaxHeight = (totalHeightHalf);
+                                    PseudoClasses.Set(":separator", true);
+                                    return totalHeightHalf;
+                                }
+                            }
                             else
                             {
                                 // Couldn't determine the menuItems.
@@ -2451,7 +2451,7 @@ namespace FluentAvalonia.UI.Controls
         }
 
 
-        
+
 
         //////////////////////////////////////
         //////// TOP NAV RELATED ////////////
@@ -2820,7 +2820,7 @@ namespace FluentAvalonia.UI.Controls
                 //PseudoClasses.Set(":listsizefull", true);
             }
 
-			PaneOpening?.Invoke(this, null);
+            PaneOpening?.Invoke(this, null);
         }
 
 
@@ -3076,7 +3076,7 @@ namespace FluentAvalonia.UI.Controls
 
             var vsdm = GetVisualStateDisplayMode(dMode);
             var svdm = SplitViewDisplayMode.Overlay;
-            
+
             switch (vsdm)
             {
                 case NavigationViewVisualStateDisplayMode.MinimalWithBackButton:
@@ -3170,29 +3170,29 @@ namespace FluentAvalonia.UI.Controls
             DisplayModeChanged?.Invoke(this, ea);
         }
 
-		private void UpdatePaneOverlayGroup()
-		{
-			if (_splitView != null)
-			{
-				if (IsPaneOpen && (_splitView.DisplayMode == SplitViewDisplayMode.CompactOverlay ||
-					_splitView.DisplayMode == SplitViewDisplayMode.Overlay))
-				{
-					PseudoClasses.Set(":panenotoverlaying", false);
-				}
-				else
-				{
-					//PaneNotOverlaying VisualState
-					PseudoClasses.Set(":panenotoverlaying", true);
-				}
-			}
-		}
+        private void UpdatePaneOverlayGroup()
+        {
+            if (_splitView != null)
+            {
+                if (IsPaneOpen && (_splitView.DisplayMode == SplitViewDisplayMode.CompactOverlay ||
+                    _splitView.DisplayMode == SplitViewDisplayMode.Overlay))
+                {
+                    PseudoClasses.Set(":panenotoverlaying", false);
+                }
+                else
+                {
+                    //PaneNotOverlaying VisualState
+                    PseudoClasses.Set(":panenotoverlaying", true);
+                }
+            }
+        }
 
 
 
 
-		//////////////////////////////////////////
-		//////// SELECTION INDICATOR ////////////
-		////////////////////////////////////////
+        //////////////////////////////////////////
+        //////// SELECTION INDICATOR ////////////
+        ////////////////////////////////////////
 
         private void AnimateSelectionChangedToItem(object selItem)
         {
@@ -3210,19 +3210,19 @@ namespace FluentAvalonia.UI.Controls
             if (_lastSelectedItemPendingAnimationInTopNav != null)
                 return;
 
-			var prevIndicator = _activeIndicator;
-			var nextIndicator = FindSelectionIndicator(nextItem);
+            var prevIndicator = _activeIndicator;
+            var nextIndicator = FindSelectionIndicator(nextItem);
 
-			if (prevIndicator == nextIndicator)
-				return;
+            if (prevIndicator == nextIndicator)
+                return;
 
-			if (prevIndicator != null)
-				prevIndicator.Opacity = 0;
-			if (nextIndicator != null)
-				nextIndicator.Opacity = 1;
+            if (prevIndicator != null)
+                prevIndicator.Opacity = 0;
+            if (nextIndicator != null)
+                nextIndicator.Opacity = 1;
 
-			_activeIndicator = nextIndicator;
-		}
+            _activeIndicator = nextIndicator;
+        }
 
         private IControl FindSelectionIndicator(object item)
         {
@@ -3358,12 +3358,12 @@ namespace FluentAvalonia.UI.Controls
             bool isPaneTBVis = IsPaneToggleButtonVisible;
             bool isTopNav = IsTopNavigationView;
 
-			_isLeftPaneTitleEmpty = (isPaneTBVis ||
-				isTopNav ||
-				string.IsNullOrEmpty(PaneTitle) ||
-				(PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen)) ;
+            _isLeftPaneTitleEmpty = (isPaneTBVis ||
+                isTopNav ||
+                string.IsNullOrEmpty(PaneTitle) ||
+                (PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal && !IsPaneOpen));
 
-			_paneTitleHolderFrameworkElement.IsVisible = _isLeftPaneTitleEmpty ? false : true;
+            _paneTitleHolderFrameworkElement.IsVisible = _isLeftPaneTitleEmpty ? false : true;
 
             if (_paneTitleFrameworkElement != null)
             {
@@ -3371,22 +3371,22 @@ namespace FluentAvalonia.UI.Controls
                 var second = SetPaneTitleFrameworkElementParent(_paneTitlePresenter, _paneTitleFrameworkElement, isTopNav || isPaneTBVis);
                 var third = SetPaneTitleFrameworkElementParent(_paneTitleOnTopPane, _paneTitleFrameworkElement, !isTopNav || isPaneTBVis);
 
-				if (first != null)
-				{ 
-					first();
-					_paneTitleOnTopPane.IsVisible = false;
-				}
-				else if (second != null)
-				{ 
-					second();
-					_paneTitleOnTopPane.IsVisible = false;
-				}
-				else if (third != null)
-				{ 
-					third();
+                if (first != null)
+                {
+                    first();
+                    _paneTitleOnTopPane.IsVisible = false;
+                }
+                else if (second != null)
+                {
+                    second();
+                    _paneTitleOnTopPane.IsVisible = false;
+                }
+                else if (third != null)
+                {
+                    third();
 
-					_paneTitleOnTopPane.IsVisible = !string.IsNullOrEmpty(PaneTitle) && PaneTitle.Length != 0;
-				}
+                    _paneTitleOnTopPane.IsVisible = !string.IsNullOrEmpty(PaneTitle) && PaneTitle.Length != 0;
+                }
             }
         }
 
@@ -3426,8 +3426,8 @@ namespace FluentAvalonia.UI.Controls
             }
         }
 
-        private void CloseTopNavigationViewFlyout() 
-        { 
+        private void CloseTopNavigationViewFlyout()
+        {
             _topNavOverflowButton?.Flyout?.Hide();
         }
 
@@ -3681,7 +3681,7 @@ namespace FluentAvalonia.UI.Controls
                 if (cont != null)
                 {
                     return cont is T t ? t : default;
-                }                
+                }
             }
 
             // then look in footer menu
