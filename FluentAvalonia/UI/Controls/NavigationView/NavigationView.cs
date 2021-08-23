@@ -1476,7 +1476,7 @@ namespace FluentAvalonia.UI.Controls
                 // calculate items to be removed from primary because a overflow item is selected. 
                 // SelectedItem is assumed to be removed from primary first, then added it back if it should not be removed
                 var itemsToBeRemoved = FindMovableItemsToBeRemovedFromPrimaryList(widthAtLeastToBeRemoved, new List<int>(0));
-
+                
                 // calculate the size to be removed
                 var topBeRemovedItemWidth = _topDataProvider.CalculateWidthForItems(itemsToBeRemoved);
 

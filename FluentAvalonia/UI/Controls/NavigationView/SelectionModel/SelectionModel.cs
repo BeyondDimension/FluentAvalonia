@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -257,7 +257,7 @@ namespace FluentAvalonia.UI.Controls
                                     if (index >= currentIndex && index < currentIndex + currentCount)
                                     {
                                         var targetIndex = node.SelectedIndices[index - currentIndex];
-                                        item = node.ItemsSourceView!.GetAt(targetIndex);
+                                        item = node.ItemsSourceView?.GetAt(targetIndex);
                                         break;
                                     }
 
