@@ -1,4 +1,4 @@
-﻿//This is just my Win32 interop file, it's a mess
+//This is just my Win32 interop file, it's a mess
 //I play around alot :)
 using System;
 using System.Text;
@@ -20,7 +20,7 @@ namespace FluentAvalonia.Interop
         [DllImport("uxtheme.dll", EntryPoint = "#96")]
         public static extern uint GetImmersiveColorTypeFromName(IntPtr pName);
         [DllImport("uxtheme.dll", EntryPoint = "#98")]
-        public static extern int GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
+        public static extern uint GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
 
         public static Avalonia.Media.Color GetThemeColor()
         {
@@ -38,7 +38,7 @@ namespace FluentAvalonia.Interop
         public static Avalonia.Media.Color GetThemeColorRef(string h, bool ignoreHighContrast = false)
         {
             var colorSetEx = GetImmersiveColorFromColorSetEx(
-            (uint)GetImmersiveUserColorSetPreference(false, false),
+            GetImmersiveUserColorSetPreference(false, false),
             GetImmersiveColorTypeFromName(Marshal.StringToHGlobalUni(h)),
             ignoreHighContrast, 0);
 
