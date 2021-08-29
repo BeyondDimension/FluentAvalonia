@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -160,9 +160,9 @@ namespace FluentAvalonia.UI.Controls
 			return _presenter;
 		}
 
-		protected override void OnOpening()
+		protected override void OnOpening(CancelEventArgs args)
 		{
-			base.OnOpening();
+			base.OnOpening(args);
 			if (PrimaryCommands.Count > 0 && _commandBar.PrimaryCommands.Count == 0)
 			{
 				_commandBar.PrimaryCommands.AddRange(PrimaryCommands);
