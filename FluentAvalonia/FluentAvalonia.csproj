@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,30 +6,27 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/amwx/FluentAvalonia</RepositoryUrl>
     <PackageId>FluentAvaloniaUI</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>1.1.1</Version>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
   </PropertyGroup>
 
-    <PropertyGroup>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>1.1.1</Version>
-        <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    </PropertyGroup>
 
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-    <ItemGroup>
-        <AvaloniaResource Include="Assets\*.*" />
-	    <AvaloniaResource Include="Fonts\*.*" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <PackageReference Include="Avalonia" Version="0.10.6" />
-      <PackageReference Include="Avalonia.Desktop" Version="0.10.6" />
-      <PackageReference Include="Avalonia.Diagnostics" Version="0.10.6" />
-    </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\*.*" />
+    <AvaloniaResource Include="Fonts\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Diagnostics" />
+  </ItemGroup>
 </Project>
