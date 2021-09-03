@@ -33,10 +33,10 @@ namespace FluentAvalonia.UI.Controls
             Confirmed?.Invoke(this, null);
         }
 
-        protected override void OnOpening(CancelEventArgs args)
+        protected override void OnOpened()
         {
-            base.OnOpening(args);
-            //(Popup.Child as PickerFlyoutPresenter).ShowHideButtons(ShouldShowConfirmationButtons());
+            base.OnOpened();
+            (Popup.Child as PickerFlyoutPresenter).ShowHideButtons(ShouldShowConfirmationButtons());
         }
 
         protected override bool ShouldShowConfirmationButtons() => _showButtons;
