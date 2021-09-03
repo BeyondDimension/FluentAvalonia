@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -165,7 +165,7 @@ namespace FluentAvalonia.UI.Controls
 			if(_flyout == null)
 			{
 				_flyout = new ColorPickerFlyout();
-			}
+            }
 			_flyout.Closed += OnFlyoutClosed;
 			_flyout.Confirmed += OnFlyoutConfirmed;
 			_flyout.Dismissed += OnFlyoutDismissed;
