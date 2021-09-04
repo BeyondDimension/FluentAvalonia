@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -25,37 +25,37 @@ namespace FluentAvalonia.UI.Controls
 
         public Uri UriSource
         {
-			get => GetValue(UriSourceProperty);
-			set => SetValue(UriSourceProperty, value);
+            get => GetValue(UriSourceProperty);
+            set => SetValue(UriSourceProperty, value);
         }
 
         public bool ShowAsMonochrome
         {
-			get => GetValue(ShowAsMonochromeProperty);
-			set => SetValue(ShowAsMonochromeProperty, value);
+            get => GetValue(ShowAsMonochromeProperty);
+            set => SetValue(ShowAsMonochromeProperty, value);
         }
 
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-		{
-			base.OnPropertyChanged(change);
-			if (change.Property == UriSourceProperty)
-			{
-				if (_bis != null)
-					throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
+        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+        {
+            base.OnPropertyChanged(change);
+            if (change.Property == UriSourceProperty)
+            {
+                if (_bis != null)
+                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-				CreateBitmap(change.NewValue.GetValueOrDefault<Uri>());
-				InvalidateVisual();
-			}
-			else if (change.Property == ShowAsMonochromeProperty)
-			{
-				if (_bis != null)
-					throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
+                CreateBitmap(change.NewValue.GetValueOrDefault<Uri>());
+                InvalidateVisual();
+            }
+            else if (change.Property == ShowAsMonochromeProperty)
+            {
+                if (_bis != null)
+                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-				InvalidateVisual();
-			}
-		}
+                InvalidateVisual();
+            }
+        }
 
-		protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size availableSize)
         {
             if (_bis != null)
                 return _originalSize;
@@ -108,7 +108,7 @@ namespace FluentAvalonia.UI.Controls
                     finalBmp.Dispose();
                 }
 
-                
+
                 using (context.PushClip(dst))
                 {
                     context.DrawImage(bmp, new Rect(bmp.Size), dst, BitmapInterpolationMode.HighQuality);
@@ -134,6 +134,8 @@ namespace FluentAvalonia.UI.Controls
             else
             {
                 var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                if (!assets.Exists(src))
+                    return;
                 _bitmap = SKBitmap.Decode(assets.Open(src));
             }
             _originalSize = new Size(_bitmap.Width, _bitmap.Height);
