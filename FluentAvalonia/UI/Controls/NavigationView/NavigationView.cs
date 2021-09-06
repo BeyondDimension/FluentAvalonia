@@ -792,20 +792,20 @@ namespace FluentAvalonia.UI.Controls
                 }
 
                 //We don't need to do this (already have IEnumerable)
-                if (sourceCollectionReset)
-                {
-                    if (_footerItemsSource != null)
-                    {
-                        _footerItemsSource.CollectionChanged -= OnFooterItemsSourceCollectionChanged;
-                        _footerItemsSource = null;
-                    }
-                }
+                //if (sourceCollectionReset)
+                //{
+                //    if (_footerItemsSource != null)
+                //    {
+                //        _footerItemsSource.CollectionChanged -= OnFooterItemsSourceCollectionChanged;
+                //        _footerItemsSource = null;
+                //    }
+                //}
 
-                if (_footerItemsSource == null)
-                {
-                    _footerItemsSource = new ItemsSourceView(itemsSource);
-                    _footerItemsSource.CollectionChanged += OnFooterItemsSourceCollectionChanged;
-                }
+                //if (_footerItemsSource == null)
+                //{
+                //    _footerItemsSource = new ItemsSourceView(itemsSource);
+                //    _footerItemsSource.CollectionChanged += OnFooterItemsSourceCollectionChanged;
+                //}
 
                 if (itemsSource != null)
                 {
