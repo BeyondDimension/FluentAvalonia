@@ -1,4 +1,4 @@
-﻿using Avalonia.Collections;
+using Avalonia.Collections;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -64,7 +64,9 @@ namespace FluentAvalonia.UI.Controls
 					Close();
 			}
 		}
-		public bool IsTopLevel => false;
+
+        bool IMenuItem.StaysOpenOnClick { get => false; set { } }
+        public bool IsTopLevel => false;
 		IMenuElement IMenuItem.Parent => Parent as IMenuElement;
 		public IMenuItem SelectedItem
 		{

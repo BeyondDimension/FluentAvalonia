@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Animation.Animators;
 using Avalonia.Controls;
@@ -29,7 +29,9 @@ namespace FluentAvaloniaSamples.Views
         {
 			InitializeComponent();
 
-			DataContext = new MainWindowViewModel();
+            TransparencyLevelHint = WindowTransparencyLevel.AcrylicBlur;
+
+            DataContext = new MainWindowViewModel();
 #if DEBUG
             this.AttachDevTools();
 #endif

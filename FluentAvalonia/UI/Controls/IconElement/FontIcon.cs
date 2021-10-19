@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
@@ -49,24 +49,24 @@ namespace FluentAvalonia.UI.Controls
         public string Glyph
         {
             get => GetValue(GlyphProperty);
-			set => SetValue(GlyphProperty, value);
+            set => SetValue(GlyphProperty, value);
         }
 
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-		{
-			base.OnPropertyChanged(change);
-			if (change.Property == TextBlock.ForegroundProperty ||
-				change.Property == TextBlock.FontSizeProperty ||
-				change.Property == TextBlock.FontFamilyProperty ||
-				change.Property == TextBlock.FontWeightProperty ||
-				change.Property == TextBlock.FontStyleProperty ||
-				change.Property == GlyphProperty)
-			{
-				GenerateText();
-			}
-		}
+        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+        {
+            base.OnPropertyChanged(change);
+            if (change.Property == TextBlock.ForegroundProperty ||
+                change.Property == TextBlock.FontSizeProperty ||
+                change.Property == TextBlock.FontFamilyProperty ||
+                change.Property == TextBlock.FontWeightProperty ||
+                change.Property == TextBlock.FontStyleProperty ||
+                change.Property == GlyphProperty)
+            {
+                GenerateText();
+            }
+        }
 
-		protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size availableSize)
         {
             if (_suspendCreate || _textLayout == null)
             {
@@ -87,7 +87,7 @@ namespace FluentAvalonia.UI.Controls
             using (context.PushPreTransform(Matrix.CreateTranslation(dstRect.Center.X - _textLayout.Size.Width / 2,
                 dstRect.Center.Y - _textLayout.Size.Height / 2)))
             {
-                _textLayout.Draw(context);
+                _textLayout.Draw(context, new Point(0, 0));
             }
         }
 
