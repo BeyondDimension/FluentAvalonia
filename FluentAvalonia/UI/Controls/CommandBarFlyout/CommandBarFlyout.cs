@@ -10,12 +10,16 @@ using System.Linq;
 
 namespace FluentAvalonia.UI.Controls
 {
-    public class CommandBarFlyout : FlyoutBase
-    {
-        public CommandBarFlyout()
-        {
-            PrimaryCommands = new AvaloniaList<ICommandBarElement>();
-            SecondaryCommands = new AvaloniaList<ICommandBarElement>();
+	public class CommandBarFlyout : FlyoutBase
+	{
+		public CommandBarFlyout()
+		{
+			// TEMPORARY FIX...REVERT TO CREATEPRESENTER() WHEN NRE ISSUE FIXED
+			_commandBar = new CommandBarFlyoutCommandBar();
+			_commandBar.SetOwningFlyout(this);
+
+			PrimaryCommands = new AvaloniaList<ICommandBarElement>();
+			SecondaryCommands = new AvaloniaList<ICommandBarElement>();
 
             PrimaryCommands.CollectionChanged += (s, e) =>
             {
@@ -124,8 +128,8 @@ namespace FluentAvalonia.UI.Controls
             };
         }
 
-        public static readonly StyledProperty<bool> AlwaysExpandedProperty =
-            AvaloniaProperty.Register<CommandBarFlyout, bool>("AlwaysExpanded");
+		public static readonly StyledProperty<bool> AlwaysExpandedProperty =
+			AvaloniaProperty.Register<CommandBarFlyout, bool>(nameof(AlwaysExpanded));
 
         [Content]
         public IAvaloniaList<ICommandBarElement> PrimaryCommands { get; }
@@ -138,38 +142,36 @@ namespace FluentAvalonia.UI.Controls
             set => SetValue(AlwaysExpandedProperty, value);
         }
 
-        protected override Control CreatePresenter()
-        {
-            _commandBar = new CommandBarFlyoutCommandBar();
-            _commandBar.SetOwningFlyout(this);
-
-            _presenter = new FlyoutPresenter
-            {
-                Background = null,
-                Foreground = null,
-                BorderBrush = null,
-                MinWidth = 0,
-                MaxWidth = double.PositiveInfinity,
-                MinHeight = 0,
-                MaxHeight = double.PositiveInfinity,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(0),
-                Content = _commandBar
-            };
+		protected override Control CreatePresenter()
+		{
+			_presenter = new FlyoutPresenter
+			{
+				Background = null,
+				Foreground = null,
+				BorderBrush = null,
+				MinWidth = 0,
+				MaxWidth = double.PositiveInfinity,
+				MinHeight = 0,
+				MaxHeight = double.PositiveInfinity,
+				BorderThickness = new Thickness(0),
+				Padding = new Thickness(0),
+				Content = _commandBar
+			};
 
             return _presenter;
         }
 
-        protected override void OnOpened()
-        {
-            base.OnOpened();
-            if (PrimaryCommands.Count > 0 && _commandBar.PrimaryCommands.Count == 0)
-            {
-                _commandBar.PrimaryCommands.AddRange(PrimaryCommands);
-            }
-            if (SecondaryCommands.Count > 0 && _commandBar.SecondaryCommands.Count == 0)
-            {
-                _commandBar.SecondaryCommands.AddRange(SecondaryCommands);
+		protected override void OnOpening(CancelEventArgs args)
+		{
+			base.OnOpening(args);
+
+			if (PrimaryCommands.Count > 0 && _commandBar.PrimaryCommands.Count == 0)
+			{
+				_commandBar.PrimaryCommands.AddRange(PrimaryCommands);
+			}
+			if (SecondaryCommands.Count > 0 && _commandBar.SecondaryCommands.Count == 0)
+			{
+				_commandBar.SecondaryCommands.AddRange(SecondaryCommands);
 
                 for (int i = 0; i < SecondaryCommands.Count; i++)
                 {

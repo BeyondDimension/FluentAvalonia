@@ -19,7 +19,8 @@
         x:Class="FluentAvaloniaSamples.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="FluentAvalonia Samples">
-  <!--<Design.DataContext>
+	
+    <!--<Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>-->
   
