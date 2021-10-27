@@ -75,7 +75,7 @@ namespace FluentAvalonia.UI.Controls
             using (context.PushPreTransform(Matrix.CreateTranslation(dstRect.Center.X - _textLayout.Size.Width / 2,
                 dstRect.Center.Y - _textLayout.Size.Height / 2)))
             {
-                _textLayout.Draw(context, new Point(0, 0));
+                _textLayout.Draw(context);
             }
         }
 

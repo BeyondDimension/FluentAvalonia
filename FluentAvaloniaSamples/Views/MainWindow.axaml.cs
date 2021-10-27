@@ -34,7 +34,7 @@ namespace FluentAvaloniaSamples.Views
         {
 			InitializeComponent();
 
-            TransparencyLevelHint = WindowTransparencyLevel.AcrylicBlur;
+            //TransparencyLevelHint = WindowTransparencyLevel.AcrylicBlur;
 
             DataContext = new MainWindowViewModel();
 #if DEBUG

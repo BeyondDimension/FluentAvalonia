@@ -65,7 +65,6 @@ namespace FluentAvalonia.UI.Controls
 			}
 		}
 
-        bool IMenuItem.StaysOpenOnClick { get => false; set { } }
         public bool IsTopLevel => false;
 		IMenuElement IMenuItem.Parent => Parent as IMenuElement;
 		public IMenuItem SelectedItem

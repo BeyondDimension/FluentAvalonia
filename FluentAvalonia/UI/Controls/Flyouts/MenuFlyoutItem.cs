@@ -74,7 +74,6 @@ namespace FluentAvalonia.UI.Controls
         bool IMenuItem.HasSubMenu => false;
         bool IMenuItem.IsPointerOverSubMenu => false;
         bool IMenuItem.IsSubMenuOpen { get => false; set { } }
-        bool IMenuItem.StaysOpenOnClick { get => false; set { } }
         public bool IsTopLevel => false;
         IMenuItem IMenuElement.SelectedItem { get => null; set { } }
         IEnumerable<IMenuItem> IMenuElement.SubItems => null;
