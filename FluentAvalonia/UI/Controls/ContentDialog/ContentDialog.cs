@@ -453,12 +453,22 @@ namespace FluentAvalonia.UI.Controls
 			return await tcs.Task;
 		}
 
-		public void Hide()
+		/// <summary>
+		/// Closes the current <see cref="ContentDialog"/> without a result (<see cref="ContentDialogResult"/>.<see cref="ContentDialogResult.None"/>)
+		/// </summary>
+		public void Hide() => Hide(ContentDialogResult.None);
+		
+
+		/// <summary>
+		/// Closes the current <see cref="ContentDialog"/> with the given <see cref="ContentDialogResult"/> <para>ddd</para>
+		/// </summary>
+		/// <param name="dialogResult">The <see cref="ContentDialogResult"/> to return</param>
+		public void Hide(ContentDialogResult dialogResult)
 		{
-			result = ContentDialogResult.None;
+			result = dialogResult;
 			HideCore();
 		}
-
+		
 		internal void CompleteButtonClickDeferral()
 		{
 			IsEnabled = true;
@@ -889,7 +899,7 @@ namespace FluentAvalonia.UI.Controls
 			{
 				// OverlayLayer is a Canvas, so we won't get a signal to resize if the window
 				// bounds change. Subscribe to force update
-				wb.GetObservable(BoundsProperty).Subscribe(_ => OnRootBoundsChanged());
+				_rootBoundsWatcher = wb.GetObservable(BoundsProperty).Subscribe(_ => OnRootBoundsChanged());
 			}
 		}
 

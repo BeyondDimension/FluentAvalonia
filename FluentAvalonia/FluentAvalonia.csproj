@@ -6,11 +6,13 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/amwx/FluentAvalonia</RepositoryUrl>
     <PackageId>FluentAvaloniaUI</PackageId>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.1.5</Version>
-    <AssemblyVersion>1.1.5.0</AssemblyVersion>
   </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Version>1.1.6</Version>
+        <AssemblyVersion>1.1.6.0</AssemblyVersion>
+    </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\*.*" />
