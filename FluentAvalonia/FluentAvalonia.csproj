@@ -1,29 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFramework>
     <Nullable>disable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RepositoryUrl>https://github.com/amwx/FluentAvalonia</RepositoryUrl>
-    <PackageId>FluentAvaloniaUI</PackageId>
-  </PropertyGroup>
+	<RepositoryUrl>https://github.com/amwx/FluentAvalonia</RepositoryUrl>
+	<PackageId>FluentAvaloniaUI</PackageId>
+</PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
 
     <PropertyGroup>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Version>1.1.6</Version>
-        <AssemblyVersion>1.1.6.0</AssemblyVersion>
-        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <Version>1.1.8</Version>
+        <AssemblyVersion>1.1.8.0</AssemblyVersion>
     </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\*.*" />
-    <AvaloniaResource Include="Fonts\*.*" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" />
-    <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)'=='Debug'" />
-  </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\*.*" />
+	    <AvaloniaResource Include="Fonts\*.*" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="Avalonia.Desktop" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" />
+        <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)'=='Debug'" />
+    </ItemGroup>
 </Project>

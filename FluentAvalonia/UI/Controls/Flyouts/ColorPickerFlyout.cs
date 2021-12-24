@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls.Primitives;
+using System;
 using System.ComponentModel;
 
 namespace FluentAvalonia.UI.Controls
@@ -27,11 +28,11 @@ namespace FluentAvalonia.UI.Controls
             return pfp;
         }
 
-        protected override void OnConfirmed()
-        {
-            Hide();
-            Confirmed?.Invoke(this, null);
-        }
+		protected override void OnConfirmed()
+		{
+			Hide();
+			Confirmed?.Invoke(this, EventArgs.Empty);
+		}
 
 		protected override void OnOpening(CancelEventArgs args)
 		{
@@ -48,11 +49,11 @@ namespace FluentAvalonia.UI.Controls
 
         protected override bool ShouldShowConfirmationButtons() => _showButtons;
 
-        private void OnFlyoutDismissed(PickerFlyoutPresenter sender, object args)
-        {
-            Hide();
-            Dismissed?.Invoke(this, null);
-        }
+		private void OnFlyoutDismissed(PickerFlyoutPresenter sender, object args)
+		{
+			Hide();
+			Dismissed?.Invoke(this, EventArgs.Empty);
+		}
 
         private void OnFlyoutConfirmed(PickerFlyoutPresenter sender, object args)
         {
