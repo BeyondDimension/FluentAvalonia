@@ -14,18 +14,17 @@
         xmlns:media="using:FluentAvalonia.UI.Media"
 		xmlns:input="using:FluentAvalonia.UI.Input"
         Width="1200" Height="700"
-        Background="{x:Null}"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FluentAvaloniaSamples.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="FluentAvalonia Samples">
-	
-    <!--<Design.DataContext>
+
+  <!--<Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>-->
-	
-	<Panel Background="{DynamicResource TestBrush}">		
-		<ui:NavigationView Name="NavView"
+
+  <Panel Background="{DynamicResource TestBrush}">
+    <ui:NavigationView Name="NavView"
 							PaneDisplayMode="Left"
 							IsVisible="True"
 						IsBackButtonVisible="True" AlwaysShowHeader="True"

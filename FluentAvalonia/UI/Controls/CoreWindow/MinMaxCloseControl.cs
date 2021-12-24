@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
@@ -99,7 +99,7 @@ namespace FluentAvalonia.UI.Controls.Primitives
 			PseudoClasses.Set(":maximized", state == WindowState.Maximized);
 		}
 
-		internal bool HitTestMaxButton(Point pos)
+        public bool HitTestMaxButton(Point pos)
 		{
 			if (_maximizeButton != null)
 				return _maximizeButton.HitTestCustom(pos);
@@ -107,7 +107,7 @@ namespace FluentAvalonia.UI.Controls.Primitives
 			return false;
 		}
 
-		internal void FakeMaximizeHover(bool hover)
+        public void FakeMaximizeHover(bool hover)
 		{
 			if (_maximizeButton != null)
 			{
@@ -118,7 +118,7 @@ namespace FluentAvalonia.UI.Controls.Primitives
 			}
 		}
 
-		internal void FakeMaximizePressed(bool pressed)
+        public void FakeMaximizePressed(bool pressed)
 		{
 			if (_maximizeButton != null)
 			{
@@ -126,7 +126,7 @@ namespace FluentAvalonia.UI.Controls.Primitives
 			}
 		}
 
-		internal void FakeMaximizeClick()
+		public void FakeMaximizeClick()
 		{
 			OnButtonClick(_maximizeButton, null);
 		}
