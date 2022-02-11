@@ -8,14 +8,19 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
-    <AvaloniaResource Include="DescriptionTexts\**" />
+    <AvaloniaResource Include="Pages\SampleCode\**" />
   </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
+        <None Remove="Pages\SampleCode\CoreWindow3.cs.txt" />
+        <None Remove="Pages\SampleCode\CoreWindow3.xaml.txt" />
+    </ItemGroup>
+    <ItemGroup>
     <PackageReference Include="Avalonia"/>
     <PackageReference Include="Avalonia.Desktop"/>
     <PackageReference Include="Avalonia.Diagnostics"/>
+    <PackageReference Include="Avalonia.AvaloniaEdit"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FluentAvalonia\FluentAvalonia.csproj" />
-  </ItemGroup>
+  </ItemGroup>  
 </Project>

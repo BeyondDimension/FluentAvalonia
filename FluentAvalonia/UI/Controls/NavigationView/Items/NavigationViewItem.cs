@@ -7,144 +7,24 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls.Primitives;
 using System;
-using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reactive.Disposables;
 
 namespace FluentAvalonia.UI.Controls
 {
+    /// <summary>
+    /// Represents the container for an item in a NavigationView control.
+    /// </summary>
     [PseudoClasses(":leftnav", ":topnav", ":topoverflow")]
-    public class NavigationViewItem : NavigationViewItemBase
+    public partial class NavigationViewItem : NavigationViewItemBase
     {
         public NavigationViewItem()
         {
             _menuItems = new AvaloniaList<object>();
         }
-
-        public static readonly StyledProperty<double> CompactPaneLengthProperty =
-            AvaloniaProperty.Register<NavigationViewItem, double>(nameof(CompactPaneLength), 48.0);
-
-        public static readonly DirectProperty<NavigationViewItem, bool> HasUnrealizedChildrenProperty =
-            AvaloniaProperty.RegisterDirect<NavigationViewItem, bool>(nameof(HasUnrealizedChildren),
-                x => x.HasUnrealizedChildren, (x, v) => x.HasUnrealizedChildren = v);
-
-        public static readonly StyledProperty<IconElement> IconProperty =
-            AvaloniaProperty.Register<NavigationViewItem, IconElement>(nameof(Icon));
-
-        public static readonly DirectProperty<NavigationViewItem, bool> IsChildSelectedProperty =
-            AvaloniaProperty.RegisterDirect<NavigationViewItem, bool>(nameof(IsChildSelectedProperty),
-                x => x.IsChildSelected, (x, v) => x.IsChildSelected = v);
-
-        public static readonly DirectProperty<NavigationViewItem, bool> IsExpandedProperty =
-            AvaloniaProperty.RegisterDirect<NavigationViewItem, bool>(nameof(IsExpanded),
-                x => x.IsExpanded, (x, v) => x.IsExpanded = v);
-
-        public static readonly DirectProperty<NavigationViewItem, IEnumerable> MenuItemsProperty =
-            AvaloniaProperty.RegisterDirect<NavigationViewItem, IEnumerable>(nameof(MenuItems),
-                x => x.MenuItems, (x, v) => x.MenuItems = v);
-
-        public static readonly DirectProperty<NavigationViewItem, bool> SelectsOnInvokedProperty =
-            AvaloniaProperty.RegisterDirect<NavigationViewItem, bool>(nameof(SelectsOnInvoked),
-                x => x.SelectsOnInvoked, (x, v) => x.SelectsOnInvoked = v);
-
-        public static readonly StyledProperty<InfoBadge> InfoBadgeProperty =
-            AvaloniaProperty.Register<NavigationViewItem, InfoBadge>(nameof(InfoBadge));
-
-
-        public double CompactPaneLength
-        {
-            get => GetValue(CompactPaneLengthProperty);
-            private set => SetValue(CompactPaneLengthProperty, value);
-        }
-
-        public bool HasUnrealizedChildren
-        {
-            get => _hasUnrealizedChildren;
-            set
-            {
-                if (SetAndRaise(HasUnrealizedChildrenProperty, ref _hasUnrealizedChildren, value))
-                {
-                    OnHasUnrealizedChildrenPropertyChanged();
-                }
-            }
-        }
-
-        public IconElement Icon
-        {
-            get => GetValue(IconProperty);
-            set => SetValue(IconProperty, value);
-        }
-
-        public bool IsChildSelected
-        {
-            get => _isChildSelected;
-            set => SetAndRaise(IsChildSelectedProperty, ref _isChildSelected, value);
-        }
-
-        public bool IsExpanded
-        {
-            get => _isExpanded;
-            set 
-            { 
-                if (SetAndRaise(IsExpandedProperty, ref _isExpanded, value))
-                {
-                    OnIsExpandedPropertyChanged();
-                }
-            }
-        }
-
-        public IEnumerable MenuItems
-        {
-            get => _menuItems;
-            set 
-            {
-                if (SetAndRaise(MenuItemsProperty, ref _menuItems, value))
-                {
-                    OnMenuItemsPropertyChanged();
-                }
-            }
-        }
-
-        public bool SelectsOnInvoked
-        {
-            get => _selectsOnInvoked;
-            set => SetAndRaise(SelectsOnInvokedProperty, ref _selectsOnInvoked, value);
-        }
-
-        public InfoBadge InfoBadge
-        {
-            get => GetValue(InfoBadgeProperty);
-            set => SetValue(InfoBadgeProperty, value);
-        }
-
-        //HELPER PROPERTIES
-
-        internal IControl SelectionIndicator => _presenter?.SelectionIndicator;
-
-        internal NavigationViewItemPresenter NVIPresenter => _presenter;
-
-        private bool HasChildren => (MenuItems != null && MenuItems.Count() > 0) || HasUnrealizedChildren;
-
-        private bool ShouldShowIcon => Icon != null;
-
-        private bool ShouldEnableToolTip => IsOnLeftNav && _isClosedCompact;
-
-        private bool ShouldShowContent => Content != null;
-
-        private bool IsOnLeftNav => Position == NavigationViewRepeaterPosition.LeftNav ||
-            Position == NavigationViewRepeaterPosition.LeftFooter;
-
-        private bool IsOnTopPrimary => Position == NavigationViewRepeaterPosition.TopPrimary;
-
-        internal bool ShouldRepeaterShowInFlyout => (_isClosedCompact && IsTopLevelItem) || IsOnTopPrimary;
-
-        internal bool IsRepeaterVisible => _repeater?.IsVisible ?? false;
-
-        internal ItemsRepeater GetRepeater => _repeater;
 
         protected override void OnNavigationViewItemBaseDepthChanged()
         {
@@ -185,9 +65,9 @@ namespace FluentAvalonia.UI.Controls
 
             base.OnApplyTemplate(e);
 			var x = this.Content;
-            _presenter = e.NameScope.Get<NavigationViewItemPresenter>("NVIPresenter");
+            _presenter = e.NameScope.Find<NavigationViewItemPresenter>("NVIPresenter");
 
-            _rootGrid = e.NameScope.Get<Grid>("NVIRootGrid");
+            _rootGrid = e.NameScope.Find<Grid>("NVIRootGrid");
             if (_rootGrid != null)
             {
                 var flyout = FlyoutBase.GetAttachedFlyout(_rootGrid);
@@ -225,7 +105,7 @@ namespace FluentAvalonia.UI.Controls
             //var navView = GetNavigationView;
             if (navView != null)
             {
-                _repeater = e.NameScope.Get<ItemsRepeater>("NVIMenuItemsHost");
+                _repeater = e.NameScope.Find<ItemsRepeater>("NVIMenuItemsHost");
                 if (_repeater != null)
                 {
                     (_repeater.Layout as StackLayout).DisableVirtualization = true;
@@ -239,7 +119,7 @@ namespace FluentAvalonia.UI.Controls
                 UpdateRepeaterItemsSource();
             }
 
-            _flyoutContentGrid = e.NameScope.Get<Panel>("FlyoutContentGrid");
+            _flyoutContentGrid = e.NameScope.Find<Panel>("FlyoutContentGrid");
 
             _appliedTemplate = true;
 
@@ -498,8 +378,11 @@ namespace FluentAvalonia.UI.Controls
             if (!_appliedTemplate)
                 return;
 
-			((IPseudoClasses)_presenter.Classes).Set(":selected", IsSelected);
-
+            if (_presenter != null)
+            {
+                ((IPseudoClasses)_presenter.Classes).Set(":selected", IsSelected);
+            }
+			
 			UpdateVisualStateForNavigationViewPositionChange();
 
             bool showIcon = ShouldShowIcon;
@@ -517,7 +400,10 @@ namespace FluentAvalonia.UI.Controls
             }
             else
             {
-                ((IPseudoClasses)_presenter.Classes).Set(":iconcollapsed", false);
+                if (_presenter != null)
+                {
+                    ((IPseudoClasses)_presenter.Classes).Set(":iconcollapsed", false);
+                }
             }
 
             UpdateVisualStateForToolTip();
@@ -541,10 +427,13 @@ namespace FluentAvalonia.UI.Controls
 
                 bool show = HasChildren && !(_isClosedCompact && ShouldRepeaterShowInFlyout);
                 bool expand = IsExpanded;
-                var c = this.Content;
-                ((IPseudoClasses)_presenter.Classes).Set(":chevronopen", show && expand);
-                ((IPseudoClasses)_presenter.Classes).Set(":chevronclosed", show & !expand);
-                ((IPseudoClasses)_presenter.Classes).Set(":chevronhidden", !show);
+                
+                if (_presenter != null)
+                {
+                    ((IPseudoClasses)_presenter.Classes).Set(":chevronopen", show && expand);
+                    ((IPseudoClasses)_presenter.Classes).Set(":chevronclosed", show & !expand);
+                    ((IPseudoClasses)_presenter.Classes).Set(":chevronhidden", !show);
+                }                
             }
         }
 
@@ -696,12 +585,6 @@ namespace FluentAvalonia.UI.Controls
         private bool _isClosedCompact;
         private bool _appliedTemplate;
         //private bool _hasKeyboardFocus;//TODO: needed?
-        private bool _isRepeaterParentedToFlyout;
-
-        private bool _hasUnrealizedChildren;
-        private bool _isChildSelected;
-        private bool _isExpanded;
-        private IEnumerable _menuItems;
-        private bool _selectsOnInvoked = true;
+        private bool _isRepeaterParentedToFlyout;      
     }
 }

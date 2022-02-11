@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -7,8 +6,6 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Styling;
 using FluentAvalonia.Core;
 using System;
 using System.Collections;
@@ -19,10 +16,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace FluentAvalonia.UI.Controls
 {
+    /// <summary>
+    /// Represents a container that enables navigation of app content. It has a header, 
+    /// a view for the main content, and a menu pane for navigation commands.
+    /// </summary>
     public partial class NavigationView : HeaderedContentControl
     {
         public NavigationView()
@@ -3000,10 +3000,13 @@ namespace FluentAvalonia.UI.Controls
             {
                 if (_paneContentGrid.RowDefinitions.Count >= _backButtonRowDefinition)
                 {
+                    int backButtonRowHeight = 0;
                     if (!IsOverlay && showBack)
                     {
-                        _paneContentGrid.RowDefinitions[_backButtonRowDefinition].Height = new GridLength(_backButtonHeight);
+                        backButtonRowHeight = _backButtonHeight;                        
                     }
+
+                    _paneContentGrid.RowDefinitions[_backButtonRowDefinition].Height = new GridLength(backButtonRowHeight);
                 }
             }
 
@@ -4043,7 +4046,5 @@ namespace FluentAvalonia.UI.Controls
                 TemplateSettings.OpenPaneWidth = _openPaneWidth;
             }
         }
-
-
     }
 }

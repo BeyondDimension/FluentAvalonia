@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -9,7 +9,7 @@ using System;
 
 namespace FluentAvalonia.UI.Controls
 {
-    public class BitmapIcon : IconElement
+    public partial class BitmapIcon : IconElement
     {
         ~BitmapIcon()
         {
@@ -17,45 +17,27 @@ namespace FluentAvalonia.UI.Controls
             UnlinkFromBitmapIconSource();
         }
 
-        public static readonly StyledProperty<Uri> UriSourceProperty =
-            AvaloniaProperty.Register<BitmapIcon, Uri>(nameof(UriSource));
+		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		{
+			base.OnPropertyChanged(change);
+			if (change.Property == UriSourceProperty)
+			{
+				if (_bis != null)
+					throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-        public static readonly StyledProperty<bool> ShowAsMonochromeProperty =
-            AvaloniaProperty.Register<BitmapIcon, bool>(nameof(ShowAsMonochrome));
+				CreateBitmap(change.NewValue.GetValueOrDefault<Uri>());
+				InvalidateVisual();
+			}
+			else if (change.Property == ShowAsMonochromeProperty)
+			{
+				if (_bis != null)
+					throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-        public Uri UriSource
-        {
-            get => GetValue(UriSourceProperty);
-            set => SetValue(UriSourceProperty, value);
-        }
+				InvalidateVisual();
+			}
+		}
 
-        public bool ShowAsMonochrome
-        {
-            get => GetValue(ShowAsMonochromeProperty);
-            set => SetValue(ShowAsMonochromeProperty, value);
-        }
-
-        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-        {
-            base.OnPropertyChanged(change);
-            if (change.Property == UriSourceProperty)
-            {
-                if (_bis != null)
-                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
-
-                CreateBitmap(change.NewValue.GetValueOrDefault<Uri>());
-                InvalidateVisual();
-            }
-            else if (change.Property == ShowAsMonochromeProperty)
-            {
-                if (_bis != null)
-                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
-
-                InvalidateVisual();
-            }
-        }
-
-        protected override Size MeasureOverride(Size availableSize)
+		protected override Size MeasureOverride(Size availableSize)
         {
             if (_bis != null)
                 return _originalSize;
@@ -72,8 +54,9 @@ namespace FluentAvalonia.UI.Controls
                 return;
 
             var dst = new Rect(Bounds.Size);
-            //RTB will throw ArgumentException if height or width isn't at least 1, so
-            //don't draw anything if we don't meet that requirement
+
+            // RTB will throw ArgumentException if height or width isn't at least 1, so
+            // don't draw anything if we don't meet that requirement
             if (dst.Width < 1 || dst.Height < 1)
                 return;
 
@@ -107,8 +90,7 @@ namespace FluentAvalonia.UI.Controls
 
                     finalBmp.Dispose();
                 }
-
-
+                                
                 using (context.PushClip(dst))
                 {
                     context.DrawImage(bmp, new Rect(bmp.Size), dst, BitmapInterpolationMode.HighQuality);
@@ -134,8 +116,6 @@ namespace FluentAvalonia.UI.Controls
             else
             {
                 var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                if (!assets.Exists(src))
-                    return;
                 _bitmap = SKBitmap.Decode(assets.Open(src));
             }
             _originalSize = new Size(_bitmap.Width, _bitmap.Height);
@@ -152,6 +132,7 @@ namespace FluentAvalonia.UI.Controls
         {
             if (bis == null)
                 throw new ArgumentNullException("BitmapIconSource", "BitmapIconSource cannot be null");
+
             _bis = bis;
             OnLinkedBitmapIconSourceChanged(null, null);
             bis.OnBitmapChanged += OnLinkedBitmapIconSourceChanged;
@@ -161,6 +142,7 @@ namespace FluentAvalonia.UI.Controls
         {
             if (_bis != null)
                 _bis.OnBitmapChanged -= OnLinkedBitmapIconSourceChanged;
+
             _bis = null;
         }
 
