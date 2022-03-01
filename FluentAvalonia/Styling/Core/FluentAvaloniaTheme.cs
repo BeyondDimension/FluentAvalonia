@@ -198,7 +198,7 @@ namespace FluentAvalonia.Styling
             Owner = owner;
 
             (_themeResources as IResourceProvider).AddOwner(owner);
-           // (_systemResources as IResourceProvider).AddOwner(owner);
+            // (_systemResources as IResourceProvider).AddOwner(owner);
 
             for (int i = 0; i < Children.Count; i++)
             {
@@ -218,7 +218,7 @@ namespace FluentAvalonia.Styling
                 Owner = null;
 
                 (_themeResources as IResourceProvider).RemoveOwner(owner);
-               // (_systemResources as IResourceProvider).RemoveOwner(owner);
+                // (_systemResources as IResourceProvider).RemoveOwner(owner);
 
                 for (int i = 0; i < Children.Count; i++)
                 {
@@ -240,7 +240,7 @@ namespace FluentAvalonia.Styling
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (UseUserAccentColorOnWindows)
-                {                   
+                {
                     try
                     {
                         IUISettings3 settings = WinRTInterop.CreateInstance<IUISettings3>("Windows.UI.ViewManagement.UISettings");
@@ -250,7 +250,7 @@ namespace FluentAvalonia.Styling
                     catch
                     {
 
-                    }                   
+                    }
                 }
 
                 if (UseSystemThemeOnWindows)
@@ -335,7 +335,7 @@ namespace FluentAvalonia.Styling
 
             // ALL keyword should only be used in UnitTests since it doesn't load anything
             if (SkipControls != "ALL")
-			{
+            {
                 string[] controls = hasControlsToSkip ? SkipControls.Split(';') : null;
                 var prefix = "avares://FluentAvalonia";
                 // Now load all the Avalonia Controls
@@ -383,7 +383,7 @@ namespace FluentAvalonia.Styling
         {
             if (newTheme == null)
             {
-                _requestedTheme = ResolveThemeAndInitializeSystemResources();                
+                _requestedTheme = ResolveThemeAndInitializeSystemResources();
             }
 
             var old = _requestedTheme;
@@ -392,7 +392,8 @@ namespace FluentAvalonia.Styling
                 _requestedTheme = newTheme;
 
                 // Remove the old theme resources
-                _themeResources.MergedDictionaries.RemoveAt(1);
+                if (_themeResources.MergedDictionaries.Count > 0)
+                    _themeResources.MergedDictionaries.RemoveAt(_themeResources.MergedDictionaries.Count - 1);
 
                 _themeResources.MergedDictionaries.Add(
                     (ResourceDictionary)AvaloniaXamlLoader.Load(new Uri($"avares://FluentAvalonia/Styling/StylesV2/{_requestedTheme}Resources.axaml"), _baseUri));
@@ -437,11 +438,11 @@ namespace FluentAvalonia.Styling
                     Logger.TryGet(LogEventLevel.Information, "FluentAvaloniaTheme")?
                             .Log("FluentAvaloniaTheme", "Unable to create instance of ComObject IUISettings");
                 }
-                
+
                 if (UseSystemThemeOnWindows)
                 {
                     try
-                    {                        
+                    {
                         int isUsingHighContrast = accessibility.HighContrast;
                         if (isUsingHighContrast == 1)
                         {
@@ -477,7 +478,7 @@ namespace FluentAvalonia.Styling
                 {
                     theme = string.IsNullOrEmpty(theme) ? LightModeString : theme;
                 }
-                
+
                 if (CustomAccentColor != null)
                 {
                     LoadCustomAccentColor();
@@ -529,7 +530,7 @@ namespace FluentAvalonia.Styling
                 {
                     LoadDefaultAccentColor();
                 }
-               
+
                 _themeResources.Add("ContentControlThemeFontFamily", FontFamily.Default);
             }
 
@@ -576,7 +577,7 @@ namespace FluentAvalonia.Styling
             TryAddResource("SystemColorButtonTextColor", UIElementType.ButtonText);
             TryAddResource("SystemColorHighlightColor", UIElementType.Highlight);
             TryAddResource("SystemColorHighlightTextColor", UIElementType.HighlightText);
-            TryAddResource("SystemColorHotlightColor", UIElementType.Hotlight);            
+            TryAddResource("SystemColorHotlightColor", UIElementType.Hotlight);
         }
 
         private void LoadCustomAccentColor()
@@ -590,7 +591,7 @@ namespace FluentAvalonia.Styling
                         var settings = WinRTInterop.CreateInstance<IUISettings3>("Windows.UI.ViewManagement.UISettings");
                         TryLoadWindowsAccentColor(settings);
                     }
-                    catch 
+                    catch
                     {
                         LoadDefaultAccentColor();
                     }
