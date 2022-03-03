@@ -1,10 +1,10 @@
 <Project>
     <ItemGroup>
-        <PackageVersion Include="Avalonia" Version="0.10.12" />
-        <PackageVersion Include="Avalonia.Desktop" Version="0.10.12" />
-        <PackageVersion Include="Avalonia.Diagnostics" Version="0.10.12" />
-        <PackageVersion Include="Avalonia.Controls.DataGrid" Version="0.10.12" />
-		<PackageVersion Include="Avalonia.AvaloniaEdit" Version="0.10.12.1" />
+        <PackageVersion Include="Avalonia" Version="0.10.13" />
+        <PackageVersion Include="Avalonia.Desktop" Version="0.10.13" />
+        <PackageVersion Include="Avalonia.Diagnostics" Version="0.10.13" />
+        <PackageVersion Include="Avalonia.Controls.DataGrid" Version="0.10.13" />
+		<PackageVersion Include="Avalonia.AvaloniaEdit" Version="0.10.12.2" />
 		<PackageVersion Include="MicroCom.CodeGenerator.MSBuild" Version="0.10.4" />
 		<PackageVersion Include="MicroCom.Runtime" Version="0.10.4" />
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
