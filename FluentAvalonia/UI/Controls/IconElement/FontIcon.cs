@@ -9,9 +9,9 @@ namespace FluentAvalonia.UI.Controls
     /// Represents an icon that uses a glyph from the specified font.
     /// </summary>
     public partial class FontIcon : IconElement
-    {       
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-		{
+    {
+        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+        {
             if (change.Property == TextBlock.ForegroundProperty ||
                 change.Property == TextBlock.FontSizeProperty ||
                 change.Property == TextBlock.FontFamilyProperty ||
@@ -22,10 +22,10 @@ namespace FluentAvalonia.UI.Controls
                 GenerateText();
             }
 
-            base.OnPropertyChanged(change);			
-		}
+            base.OnPropertyChanged(change);
+        }
 
-		protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size availableSize)
         {
             if (_suspendCreate || _textLayout == null)
             {
@@ -54,10 +54,14 @@ namespace FluentAvalonia.UI.Controls
         {
             if (_suspendCreate)
                 return;
-
-            _textLayout = new TextLayout(Glyph, new Typeface(FontFamily, FontStyle, FontWeight),
-               FontSize, Foreground, TextAlignment.Left);
-
+            try
+            {
+                _textLayout = new TextLayout(Glyph, new Typeface(FontFamily, FontStyle, FontWeight),
+                   FontSize, Foreground, TextAlignment.Left);
+            }
+            catch
+            {
+            }
             InvalidateVisual();
         }
 

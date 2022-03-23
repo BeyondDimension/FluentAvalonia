@@ -524,7 +524,7 @@ namespace FluentAvalonia.UI.Controls
                 if (_cache[i].GetType() == srcPageType)
                 {
                     var item = _cache[i];
-                    _cache.RemoveAt(i);
+                    //_cache.RemoveAt(i);
                     return item;
                 }
             }
