@@ -41,69 +41,15 @@ namespace FluentAvalonia.UI.Controls
 			set => SetValue(DataProperty, value);
         }
 
-        /// <summary>
-        /// Defines the <see cref="Stretch"/> property.
-        /// </summary>
-        public static readonly StyledProperty<Stretch> StretchProperty =
-            Shape.StretchProperty.AddOwner<PathIcon>();
-
-        /// <summary>
-        /// Gets or sets a <see cref="Stretch"/> enumeration value that describes how the shape fills its allocated space.
-        /// </summary>
-        public Stretch Stretch
-        {
-            get => GetValue(StretchProperty);
-            set => SetValue(StretchProperty, value);
-        }
-
-        /// <summary>
-        /// Defines the <see cref="StretchDirection"/> property.
-        /// </summary>
-        public static readonly StyledProperty<StretchDirection> StretchDirectionProperty =
-            Viewbox.StretchDirectionProperty.AddOwner<Avalonia.Controls.PathIcon>();
-        
-        /// <summary>
-        /// Gets or sets a value controlling in what direction contents will be stretched.
-        /// </summary>
-        public StretchDirection StretchDirection
-        {
-            get => GetValue(StretchDirectionProperty);
-            set => SetValue(StretchDirectionProperty, value);
-        }
-        
-        /// <summary>
-        /// Gets a value that represents the final rendered <see cref="Geometry"/> of the shape.
-        /// </summary>
-        private Geometry RenderedGeometry
-        {
-            get
-            {
-                if (_renderedGeometry == null && Data != null)
-                {
-                    if (_transform == Matrix.Identity)
-                    {
-                        _renderedGeometry = Data;
-                    }
-                    else
-                    {
-                        _renderedGeometry = Data.Clone();
-
-                        if (_renderedGeometry.Transform == null ||
-                            _renderedGeometry.Transform.Value == Matrix.Identity)
-                        {
-                            _renderedGeometry.Transform = new MatrixTransform(_transform);
-                        }
-                        else
-                        {
-                            _renderedGeometry.Transform = new MatrixTransform(
-                                _renderedGeometry.Transform.Value * _transform);
-                        }
-                    }
-                }
-
-                return _renderedGeometry;
-            }
-        }
+		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		{
+			base.OnPropertyChanged(change);
+			if (change.Property == DataProperty)
+			{
+				InvalidateMeasure();
+				InvalidateVisual();
+			}
+		}
 
         protected override Size MeasureOverride(Size availableSize)
         {
