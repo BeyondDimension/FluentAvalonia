@@ -33,7 +33,7 @@ namespace FluentAvalonia.Styling
         {
             get => _requestedTheme;
             set
-            {                
+            {
                 if (_hasLoaded)
                     Refresh(value);
                 else
@@ -240,7 +240,7 @@ namespace FluentAvalonia.Styling
         /// </summary>
         public void InvalidateThemingFromSystemThemeChanged()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 if (UseUserAccentColorOnWindows)
                 {
@@ -278,8 +278,8 @@ namespace FluentAvalonia.Styling
 
             try
             {
-                Win32Interop.OSVERSIONINFOEX osInfo = new Win32Interop.OSVERSIONINFOEX { OSVersionInfoSize = Marshal.SizeOf(typeof(Win32Interop.OSVERSIONINFOEX)) };
-                Win32Interop.RtlGetVersion(ref osInfo);
+                //Win32Interop.OSVERSIONINFOEX osInfo = new Win32Interop.OSVERSIONINFOEX { OSVersionInfoSize = Marshal.SizeOf(typeof(Win32Interop.OSVERSIONINFOEX)) };
+                //Win32Interop.RtlGetVersion(ref osInfo);
 
                 if (string.IsNullOrEmpty(theme))
                 {
@@ -290,7 +290,7 @@ namespace FluentAvalonia.Styling
                     theme = IsValidRequestedTheme(theme) ? theme : IsValidRequestedTheme(RequestedTheme) ? RequestedTheme : LightModeString;
                 }
 
-                Win32Interop.ApplyTheme(window.PlatformImpl.Handle.Handle, theme.Equals(DarkModeString, StringComparison.OrdinalIgnoreCase), osInfo);
+                Win32Interop.ApplyTheme(window.PlatformImpl.Handle.Handle, theme.Equals(DarkModeString, StringComparison.OrdinalIgnoreCase), OperatingSystem2.Version());
             }
             catch
             {
@@ -329,7 +329,7 @@ namespace FluentAvalonia.Styling
             _themeResources.MergedDictionaries.Add(
                 (ResourceDictionary)AvaloniaXamlLoader.Load(new Uri($"avares://FluentAvalonia/Styling/StylesV2/{_requestedTheme}Resources.axaml"), _baseUri));
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.Equals(_requestedTheme, HighContrastModeString, StringComparison.OrdinalIgnoreCase))
+            if (OperatingSystem.IsWindows() && string.Equals(_requestedTheme, HighContrastModeString, StringComparison.OrdinalIgnoreCase))
             {
                 TryLoadHighContrastThemeColors();
             }
@@ -405,7 +405,7 @@ namespace FluentAvalonia.Styling
 
                 if (string.Equals(_requestedTheme, HighContrastModeString, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (OperatingSystem.IsWindows())
                     {
                         TryLoadHighContrastThemeColors();
                     }
@@ -420,7 +420,7 @@ namespace FluentAvalonia.Styling
         private string ResolveThemeAndInitializeSystemResources()
         {
             string theme = _requestedTheme;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 IAccessibilitySettings accessibility = null;
                 try
@@ -501,10 +501,11 @@ namespace FluentAvalonia.Styling
                 {
                     try
                     {
-                        Win32Interop.OSVERSIONINFOEX osInfo = new Win32Interop.OSVERSIONINFOEX { OSVersionInfoSize = Marshal.SizeOf(typeof(Win32Interop.OSVERSIONINFOEX)) };
-                        Win32Interop.RtlGetVersion(ref osInfo);
+                        //Win32Interop.OSVERSIONINFOEX osInfo = new Win32Interop.OSVERSIONINFOEX { OSVersionInfoSize = Marshal.SizeOf(typeof(Win32Interop.OSVERSIONINFOEX)) };
+                        //Win32Interop.RtlGetVersion(ref osInfo);
 
-                        if (osInfo.BuildNumber >= 22000) // Windows 11
+                        //if (osInfo.BuildNumber >= 22000) // Windows 11
+                        if (OperatingSystem2.IsWindows11AtLeast()) // Windows 11
                         {
                             AddOrUpdateSystemResource("ContentControlThemeFontFamily", new FontFamily("Segoe UI Variable Text"));
                         }
@@ -535,7 +536,7 @@ namespace FluentAvalonia.Styling
                 {
                     LoadDefaultAccentColor();
                 }
-               
+
                 _themeResources.Add("ContentControlThemeFontFamily", FontFamily.Default);
             }
 
@@ -549,7 +550,7 @@ namespace FluentAvalonia.Styling
 
         private void TryLoadHighContrastThemeColors()
         {
-            IUISettings settings = null;
+            IUISettings settings;
             try
             {
                 settings = WinRTInterop.CreateInstance<IUISettings>("Windows.UI.ViewManagement.UISettings");
@@ -589,7 +590,7 @@ namespace FluentAvalonia.Styling
         {
             if (!_customAccentColor.HasValue)
             {
-                if (UseUserAccentColorOnWindows && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (UseUserAccentColorOnWindows && OperatingSystem.IsWindows())
                 {
                     try
                     {

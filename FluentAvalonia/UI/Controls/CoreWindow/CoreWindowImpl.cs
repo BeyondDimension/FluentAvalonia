@@ -13,19 +13,20 @@ namespace FluentAvalonia.UI.Controls
     {
         public CoreWindowImpl()
         {
-            Win32Interop.OSVERSIONINFOEX version = new Win32Interop.OSVERSIONINFOEX
-            {
-                OSVersionInfoSize = Marshal.SizeOf<Win32Interop.OSVERSIONINFOEX>()
-            };
+            //Win32Interop.OSVERSIONINFOEX version = new Win32Interop.OSVERSIONINFOEX
+            //{
+            //    OSVersionInfoSize = Marshal.SizeOf<Win32Interop.OSVERSIONINFOEX>()
+            //};
 
-            Win32Interop.RtlGetVersion(ref version);
+            //Win32Interop.RtlGetVersion(ref version);
 
-            if (version.MajorVersion < 10)
+            //if (version.MajorVersion < 10)
+            if (!OperatingSystem2.IsWindows10AtLeast())
             {
                 throw new NotSupportedException("Windows versions earlier than 10 are not supported");
             }
 
-            _isWindows11 = version.BuildNumber >= 22000;
+            //_isWindows11 = version.BuildNumber >= 22000;
         }
 
         public event EventHandler WindowOpened;
@@ -183,8 +184,8 @@ namespace FluentAvalonia.UI.Controls
         internal void SetOwner(CoreWindow wnd)
         {
             _owner = wnd;
-            ((IPseudoClasses)wnd.Classes).Set(":windows10", !_isWindows11);
-            _owner.IsWindows11 = _isWindows11;
+            ((IPseudoClasses)wnd.Classes).Set(":windows10", !OperatingSystem2.IsWindows11AtLeast());
+            //_owner.IsWindows11 = _isWindows11;
         }
 
         private int GetResizeHandleHeight()
@@ -259,7 +260,7 @@ namespace FluentAvalonia.UI.Controls
 
             if (_owner.HitTestCaptionButtons(point))
             {
-                if (_isWindows11)
+                if (OperatingSystem2.IsWindows11AtLeast())
                 {
                     var result = _owner.HitTestMaximizeButton(point);
 
@@ -328,7 +329,7 @@ namespace FluentAvalonia.UI.Controls
             return new IntPtr((hiWord << 16) | (loWord & 0xFFFF));
         }
 
-        private bool _isWindows11;
+        //private static bool _isWindows11 => OperatingSystem2.IsWindows11AtLeast();
         private CoreWindow _owner;
         private bool _fakingMaximizeButton;
         private bool _wasFakeMaximizeDown;

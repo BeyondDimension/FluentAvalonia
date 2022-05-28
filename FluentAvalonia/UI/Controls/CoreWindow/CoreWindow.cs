@@ -94,7 +94,7 @@ namespace FluentAvalonia.UI.Controls
             }
         }
 
-        protected internal bool IsWindows11 { get; internal set; }
+        protected internal bool IsWindows11 => OperatingSystem2.IsWindows11AtLeast();
 
         protected override Size MeasureOverride(Size availableSize)
         {
@@ -104,7 +104,7 @@ namespace FluentAvalonia.UI.Controls
             // we modify the window in WM_NCCALCSIZE so we need to fix that here
             // But the content measures to the normal size - so in constrained environments
             // like the TaskDialog, stuff gets cut off
-            if (!CanResize && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!CanResize && OperatingSystem.IsWindows())
             {
                 sz = sz.WithWidth(sz.Width + 16)
                     .WithHeight(sz.Height + 8);
@@ -180,7 +180,7 @@ namespace FluentAvalonia.UI.Controls
 
         private void WindowClosed_Windows()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 ApplicationViewTitleBar.Instance.TitleBarPropertyChanged -= OnTitleBarPropertyChanged;
 
@@ -317,8 +317,7 @@ namespace FluentAvalonia.UI.Controls
             bool foundAccentLight2 = false;
 
             var thm = flAvThm.RequestedTheme;
-            object sysColorLight2 = null;
-
+            object sysColorLight2;
             if (thm == FluentAvaloniaTheme.LightModeString)
             {
                 _templateRoot.TryFindResource("SystemAccentColorDark1", out sysColorLight2);
