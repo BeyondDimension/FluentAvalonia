@@ -41,15 +41,69 @@ namespace FluentAvalonia.UI.Controls
 			set => SetValue(DataProperty, value);
         }
 
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-		{
-			base.OnPropertyChanged(change);
-			if (change.Property == DataProperty)
-			{
-				InvalidateMeasure();
-				InvalidateVisual();
-			}
-		}
+        /// <summary>
+        /// Defines the <see cref="Stretch"/> property.
+        /// </summary>
+        public static readonly StyledProperty<Stretch> StretchProperty =
+            Shape.StretchProperty.AddOwner<PathIcon>();
+
+        /// <summary>
+        /// Gets or sets a <see cref="Stretch"/> enumeration value that describes how the shape fills its allocated space.
+        /// </summary>
+        public Stretch Stretch
+        {
+            get => GetValue(StretchProperty);
+            set => SetValue(StretchProperty, value);
+        }
+
+        /// <summary>
+        /// Defines the <see cref="StretchDirection"/> property.
+        /// </summary>
+        public static readonly StyledProperty<StretchDirection> StretchDirectionProperty =
+            Viewbox.StretchDirectionProperty.AddOwner<Avalonia.Controls.PathIcon>();
+        
+        /// <summary>
+        /// Gets or sets a value controlling in what direction contents will be stretched.
+        /// </summary>
+        public StretchDirection StretchDirection
+        {
+            get => GetValue(StretchDirectionProperty);
+            set => SetValue(StretchDirectionProperty, value);
+        }
+        
+        /// <summary>
+        /// Gets a value that represents the final rendered <see cref="Geometry"/> of the shape.
+        /// </summary>
+        private Geometry RenderedGeometry
+        {
+            get
+            {
+                if (_renderedGeometry == null && Data != null)
+                {
+                    if (_transform == Matrix.Identity)
+                    {
+                        _renderedGeometry = Data;
+                    }
+                    else
+                    {
+                        _renderedGeometry = Data.Clone();
+
+                        if (_renderedGeometry.Transform == null ||
+                            _renderedGeometry.Transform.Value == Matrix.Identity)
+                        {
+                            _renderedGeometry.Transform = new MatrixTransform(_transform);
+                        }
+                        else
+                        {
+                            _renderedGeometry.Transform = new MatrixTransform(
+                                _renderedGeometry.Transform.Value * _transform);
+                        }
+                    }
+                }
+
+                return _renderedGeometry;
+            }
+        }
 
         protected override Size MeasureOverride(Size availableSize)
         {
@@ -138,10 +192,74 @@ namespace FluentAvalonia.UI.Controls
                         sx = 1.0;
                     }
 
+            if (shapeBounds.Width > 0)
+            {
+                sx = desiredX / shapeSize.Width;
+            }
+
+            if (shapeBounds.Height > 0)
+            {
+                sy = desiredY / shapeSize.Height;
+            }
+
+            if (double.IsInfinity(availableSize.Width))
+            {
+                sx = sy;
+            }
+
+            if (double.IsInfinity(availableSize.Height))
+            {
+                sy = sx;
+            }
+            
+            switch (stretch)
+            {
+                case Stretch.Uniform:
+                    sx = sy = Math.Min(sx, sy);
+                    break;
+                case Stretch.UniformToFill:
+                    sx = sy = Math.Max(sx, sy);
+                    break;
+                case Stretch.Fill:
+                    if (double.IsInfinity(availableSize.Width))
+                    {
+                        sx = 1.0;
+                    }
+
                     if (double.IsInfinity(availableSize.Height))
                     {
                         sy = 1.0;
                     }
+
+                    break;
+                default:
+                    sx = sy = 1;
+                    break;
+            }
+            
+            // Apply stretch direction by bounding scales.
+            switch (stretchDirection)
+            {
+                case StretchDirection.UpOnly:
+                    if (sx < 1.0)
+                        sx = 1.0;
+                    if (sy < 1.0)
+                        sy = 1.0;
+                    break;
+
+                case StretchDirection.DownOnly:
+                    if (sx > 1.0)
+                        sx = 1.0;
+                    if (sy > 1.0)
+                        sy = 1.0;
+                    break;
+
+                case StretchDirection.Both:
+                    break;
+
+                default:
+                    break;
+            }
 
                     break;
                 default:
