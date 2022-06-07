@@ -8,7 +8,7 @@ using System.Runtime.Versioning;
 
 namespace FluentAvalonia.UI.Controls
 {
-    [SupportedOSPlatform("Windows")]
+    //[SupportedOSPlatform("Windows")]
     internal class CoreWindowImpl : Avalonia.Win32.WindowImpl
     {
         public CoreWindowImpl()

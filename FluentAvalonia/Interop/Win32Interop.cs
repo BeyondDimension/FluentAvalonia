@@ -6,7 +6,7 @@ using System.Runtime.Versioning;
 
 namespace FluentAvalonia.Interop
 {
-    [SupportedOSPlatform("Windows")]
+    //[SupportedOSPlatform("Windows")]
     public static unsafe class Win32Interop
     {
 #pragma warning disable CA1401
@@ -81,12 +81,12 @@ namespace FluentAvalonia.Interop
             return fnShouldSystemUseDarkMode();
         }
 
-        public static bool ApplyTheme(IntPtr hwnd, bool useDark, Version osInfo)
+        public static bool ApplyTheme(IntPtr hwnd, bool useDark, OSVERSIONINFOEX osInfo)
         {
-            if (osInfo.Major < 10 || osInfo.Build < 17763) //1809
+            if (osInfo.MajorVersion < 10 || osInfo.BuildNumber < 17763) //1809
                 return false;
 
-            if (osInfo.Build < 18362) //1903
+            if (osInfo.BuildNumber < 18362) //1903
             {
                 var res = fnAllowDarkModeForApp(hwnd, useDark);
                 if (res == false)

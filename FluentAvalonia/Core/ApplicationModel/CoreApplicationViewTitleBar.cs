@@ -8,7 +8,7 @@ using FluentAvalonia.UI.Controls;
 
 namespace FluentAvalonia.Core.ApplicationModel
 {
-    [SupportedOSPlatform("Windows")]
+    //[SupportedOSPlatform("Windows")]
     public sealed class CoreApplicationViewTitleBar
     {
         public CoreApplicationViewTitleBar(CoreWindow owner)
