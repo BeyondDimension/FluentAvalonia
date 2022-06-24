@@ -599,10 +599,7 @@ namespace FluentAvalonia.Styling
                 var str = p.StandardOutput.ReadToEnd().Trim();
                 p.WaitForExit();
 
-                if (str.Equals("Dark", StringComparison.OrdinalIgnoreCase))
-                {
-                    theme = DarkModeString;
-                }
+                theme = str.Equals("Dark", StringComparison.OrdinalIgnoreCase) ? DarkModeString : LightModeString;
             }
             catch { }
 
@@ -647,9 +644,16 @@ namespace FluentAvalonia.Styling
                 var str = p.StandardOutput.ReadToEnd().Trim();
                 p.WaitForExit();
 
-                if (str.IndexOf("-dark", StringComparison.OrdinalIgnoreCase) != -1)
+                if (p.ExitCode == 0)
                 {
-                    theme = DarkModeString;
+                    if (str.IndexOf("-dark", StringComparison.OrdinalIgnoreCase) != -1)
+                    {
+                        theme = DarkModeString;
+                    }
+                    else
+                    {
+                        theme = LightModeString;
+                    }
                 }
             }
             catch { }
@@ -743,7 +747,7 @@ namespace FluentAvalonia.Styling
             }
 
             Color2 col = _customAccentColor.Value;
-            AddOrUpdateSystemResource("SystemAccentColor", _customAccentColor.Value);
+            AddOrUpdateSystemResource("SystemAccentColor", (Color)_customAccentColor.Value);
 
             AddOrUpdateSystemResource("SystemAccentColorLight1", (Color)col.LightenPercent(0.15f));
             AddOrUpdateSystemResource("SystemAccentColorLight2", (Color)col.LightenPercent(0.30f));
@@ -852,7 +856,7 @@ namespace FluentAvalonia.Styling
                         break;
                 }
 
-                AddOrUpdateSystemResource("SystemAccentColor", aColor);
+                AddOrUpdateSystemResource("SystemAccentColor", (Color)aColor);
 
                 AddOrUpdateSystemResource("SystemAccentColorLight1", (Color)aColor.LightenPercent(0.15f));
                 AddOrUpdateSystemResource("SystemAccentColorLight2", (Color)aColor.LightenPercent(0.30f));
