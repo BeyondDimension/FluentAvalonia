@@ -150,6 +150,16 @@ namespace FluentAvalonia.Interop
             public byte Reserved;
         }
 
+        /// <summary>
+        /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-adjustwindowrectexfordpi
+        /// </summary>
+        /// <param name="lpRect"></param>
+        /// <param name="dwStyle"></param>
+        /// <param name="bMenu"></param>
+        /// <param name="dwExStyle"></param>
+        /// <param name="dpi"></param>
+        /// <returns></returns>
+        [SupportedOSPlatform("Windows10.0.14393")]
         [DllImport("user32.dll", SetLastError = true)]
         public static extern unsafe bool AdjustWindowRectExForDpi(
             ref RECT lpRect,

@@ -83,23 +83,34 @@ namespace FluentAvalonia.Core.ApplicationModel
         {
             if (_owner == null)
             {
-                _height = 32;
-                return;
+                goto h32;
             }
 
-            if (OperatingSystem2.IsWindows())
+            try
             {
-                // WS_OVERLAPPEDWINDOW
-                var style = 0x00000000L | 0x00C00000L | 0x00080000L | 0x00040000L | 0x00020000L | 0x00010000L;
+                if (OperatingSystem2.IsWindowsVersionAtLeast(10, 0, 14393))
+                {
+                    // WS_OVERLAPPEDWINDOW
+                    var style = 0x00000000L | 0x00C00000L | 0x00080000L | 0x00040000L | 0x00020000L | 0x00010000L;
 
-                // This is causing the window to appear solid but is completely transparent. Weird...
-                //Win32Interop.GetWindowLongPtr(Hwnd, -16).ToInt32();
-                RECT frame = new RECT();
-                Win32Interop.AdjustWindowRectExForDpi(ref frame,
-                    (int)style, false, 0, 96);
+                    // This is causing the window to appear solid but is completely transparent. Weird...
+                    //Win32Interop.GetWindowLongPtr(Hwnd, -16).ToInt32();
+                    RECT frame = new RECT();
+                    Win32Interop.AdjustWindowRectExForDpi(ref frame,
+                        (int)style, false, 0, 96);
 
-                _height = -frame.top;
+                    _height = -frame.top;
+                    return;
+                }
             }
+            catch
+            {
+
+            }
+
+
+        h32:
+            _height = 32;
         }
 
         internal void SetCustomTitleBar(IControl ctrl)
