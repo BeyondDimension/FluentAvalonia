@@ -381,6 +381,7 @@ namespace FluentAvalonia.UI.Controls
             if (_presenter != null)
             {
                 ((IPseudoClasses)_presenter.Classes).Set(":selected", IsSelected);
+                ShowSelectionIndicator(IsSelected);
             }
 			
 			UpdateVisualStateForNavigationViewPositionChange();
