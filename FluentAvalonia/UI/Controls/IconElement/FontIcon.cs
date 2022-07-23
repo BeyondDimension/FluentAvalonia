@@ -54,9 +54,15 @@ namespace FluentAvalonia.UI.Controls
         {
             if (_suspendCreate)
                 return;
-
-            _textLayout = new TextLayout(Glyph, new Typeface(FontFamily, FontStyle, FontWeight),
-               FontSize, Foreground, TextAlignment.Left);
+            
+            try
+            {
+                _textLayout = new TextLayout(Glyph, new Typeface(FontFamily, FontStyle, FontWeight),
+                   FontSize, Foreground, TextAlignment.Left);
+            }
+            catch
+            {
+            }
 
             InvalidateVisual();
         }
