@@ -197,11 +197,28 @@ namespace FluentAvalonia.UI.Controls
             // This is causing the window to appear solid but is completely transparent. Weird...
             //Win32Interop.GetWindowLongPtr(Hwnd, -16).ToInt32();
 
-            RECT frame = new RECT();
-            Win32Interop.AdjustWindowRectExForDpi(ref frame,
-                (int)style, false, 0, (int)(RenderScaling * 96));
+            int topHeight;
 
-            marg.topHeight = -frame.top;
+            // https://appcenter.ms/orgs/BeyondDimension/apps/Steam/crashes/errors/3520679608u/overview
+            // Win32Interop.AdjustWindowRectExForDpi (RECT& lpRect, Int32 dwStyle, Boolean bMenu, Int32 dwExStyle, Int32 dpi)
+            // System.EntryPointNotFoundException: Entry point was not found.
+            // Most affected OS
+            // 10.0.10240
+            // 10.0.10586
+            if (OperatingSystem2.IsWindowsVersionAtLeast(10, 0, 14393))
+            {
+                RECT frame = new RECT();
+                Win32Interop.AdjustWindowRectExForDpi(ref frame,
+                    (int)style, false, 0, (int)(RenderScaling * 96));
+
+                topHeight = frame.top;
+            }
+            else
+            {
+                topHeight = 32;
+            }
+
+            marg.topHeight = -topHeight;
             Win32Interop.DwmExtendFrameIntoClientArea(Handle.Handle, ref marg);
 
             Win32Interop.SetWindowPos(Handle.Handle, IntPtr.Zero, 0, 0, 0, 0,
