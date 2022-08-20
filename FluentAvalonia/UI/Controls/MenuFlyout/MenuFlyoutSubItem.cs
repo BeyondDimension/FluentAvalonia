@@ -12,26 +12,28 @@ namespace FluentAvalonia.UI.Controls
 	/// </summary>
 	public partial class MenuFlyoutSubItem : MenuFlyoutItemBase, IMenuItem
 	{
-		public MenuFlyoutSubItem()
+        public bool StaysOpenOnClick { get; set; }
+
+        public MenuFlyoutSubItem()
 		{
 			_items = new AvaloniaList<object>();
 		}
 
-		protected override void OnPointerEnter(PointerEventArgs e)
+		protected override void OnPointerEntered(PointerEventArgs e)
 		{
-			base.OnPointerEnter(e);
+			base.OnPointerEntered(e);
 
 			var point = e.GetCurrentPoint(null);
-			RaiseEvent(new PointerEventArgs(MenuItem.PointerEnterItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
+			RaiseEvent(new PointerEventArgs(MenuItem.PointerEnteredItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
 				e.Timestamp, point.Properties, e.KeyModifiers));
 		}
 
-		protected override void OnPointerLeave(PointerEventArgs e)
+		protected override void OnPointerExited(PointerEventArgs e)
 		{
-			base.OnPointerLeave(e);
+			base.OnPointerExited(e);
 
 			var point = e.GetCurrentPoint(null);
-			RaiseEvent(new PointerEventArgs(MenuItem.PointerLeaveItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
+			RaiseEvent(new PointerEventArgs(MenuItem.PointerExitedItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
 				e.Timestamp, point.Properties, e.KeyModifiers));
 		}
 

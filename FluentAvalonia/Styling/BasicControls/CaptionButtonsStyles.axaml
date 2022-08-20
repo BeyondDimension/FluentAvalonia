@@ -13,8 +13,11 @@
 		<Setter Property="MinHeight" Value="32" />
 		<Setter Property="Template">
 			<ControlTemplate>
-				<StackPanel Spacing="2" VerticalAlignment="Stretch" TextBlock.FontSize="10" Orientation="Horizontal">
+				<StackPanel Spacing="2" VerticalAlignment="Stretch" Orientation="Horizontal">
 					<StackPanel.Styles>
+                        <Style Selector="TextBlock">
+                            <Setter Property="FontSize" Value="10" />
+                        </Style>
 						<Style Selector="Panel">
 							<Setter Property="Width" Value="45" />
 							<Setter Property="Background" Value="Transparent" />

@@ -155,10 +155,10 @@
 										Grid.ColumnSpan="3"
 										Content="{TemplateBinding Header}"
 										ContentTemplate="{TemplateBinding HeaderTemplate}"
-										TextBlock.FontWeight="Normal"
+                                        TextElement.FontWeight="Normal"
 										Margin="{DynamicResource TextBoxTopHeaderMargin}"
-										TextBlock.FontSize="{TemplateBinding FontSize}"
-										TextBlock.FontFamily="{TemplateBinding FontFamily}"
+                                        TextElement.FontSize="{TemplateBinding FontSize}"
+                                        TextElement.FontFamily="{TemplateBinding FontFamily}"
 										VerticalAlignment="Top"
 										IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}"/>
 

@@ -1,10 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Styling;
 using FluentAvalonia.UI.Input;
 using System;
+using System.Windows.Input;
 
 namespace FluentAvalonia.UI.Controls
 {
@@ -12,26 +14,26 @@ namespace FluentAvalonia.UI.Controls
 	{
 		Type IStyleable.StyleKey => typeof(CommandBarButton);
 
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
 		{
 			base.OnPropertyChanged(change);
 			if (change.Property == IconProperty)
 			{
-				PseudoClasses.Set(":icon", change.NewValue.GetValueOrDefault() != null);
+				PseudoClasses.Set(":icon", change.GetNewValue<IconElement>() != null);
 			}
 			else if (change.Property == LabelProperty)
 			{
-				PseudoClasses.Set(":label", change.NewValue.GetValueOrDefault() != null);
+				PseudoClasses.Set(":label", change.GetNewValue<string>() != null);
 			}
 			else if (change.Property == FlyoutProperty)
 			{
-				if (change.OldValue.GetValueOrDefault() is FlyoutBase oldFB)
+				if (change.GetOldValue<FlyoutBase>() is FlyoutBase oldFB)
 				{
 					oldFB.Closed -= OnFlyoutClosed;
 					oldFB.Opened -= OnFlyoutOpened;
 				}
 
-				if (change.NewValue.GetValueOrDefault() is FlyoutBase newFB)
+				if (change.GetNewValue<FlyoutBase>() is FlyoutBase newFB)
 				{
 					newFB.Closed += OnFlyoutClosed;
 					newFB.Opened += OnFlyoutOpened;
@@ -47,15 +49,15 @@ namespace FluentAvalonia.UI.Controls
 			}
 			else if (change.Property == HotKeyProperty)
 			{
-				PseudoClasses.Set(":hotkey", change.NewValue.GetValueOrDefault() != null);
+				PseudoClasses.Set(":hotkey", change.GetNewValue<KeyGesture>() != null);
 			}
 			else if (change.Property == IsCompactProperty)
 			{
-				PseudoClasses.Set(":compact", change.NewValue.GetValueOrDefault<bool>());
+				PseudoClasses.Set(":compact", change.GetNewValue<bool>());
 			}
 			else if (change.Property == CommandProperty)
 			{
-				if (change.OldValue.GetValueOrDefault() is XamlUICommand xamlComOld)
+				if (change.GetOldValue<ICommand>() is XamlUICommand xamlComOld)
 				{
 					if (Label == xamlComOld.Label)
 					{
@@ -76,8 +78,8 @@ namespace FluentAvalonia.UI.Controls
 						ToolTip.SetTip(this, null);
 					}
 				}
-
-				if (change.NewValue.GetValueOrDefault() is XamlUICommand xamlCom)
+                
+				if (change.GetNewValue<ICommand>() is XamlUICommand xamlCom)
 				{
 					if (string.IsNullOrEmpty(Label))
 					{

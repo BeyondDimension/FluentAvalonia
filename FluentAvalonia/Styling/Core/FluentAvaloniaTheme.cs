@@ -160,6 +160,8 @@ namespace FluentAvalonia.Styling
         bool IResourceNode.HasResources => true;
 
         public IReadOnlyList<IStyle> Children => _controlStyles;
+        
+        SelectorMatchResult IStyle.TryAttach(IStyleable target, object? host) => TryAttach(target, (IStyleHost)host);
 
         public event EventHandler OwnerChanged;
         public event TypedEventHandler<FluentAvaloniaTheme, RequestedThemeChangedEventArgs> RequestedThemeChanged;

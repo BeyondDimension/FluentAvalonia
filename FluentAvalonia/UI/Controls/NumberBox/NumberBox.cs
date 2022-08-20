@@ -54,17 +54,17 @@ namespace FluentAvalonia.UI.Controls
             }
 
             _popup = e.NameScope.Find<Popup>("UpDownPopup");
-			if (_popup != null)
-			{
-				_popup.OverlayInputPassThroughElement = this;
-			}
+            if (_popup != null)
+            {
+                _popup.OverlayInputPassThroughElement = this;
+            }
 
-			UpdateSpinButtonPlacement();
+            UpdateSpinButtonPlacement();
             UpdateSpinButtonEnabled();
 
             //UpdateVisualStateForIsEnabledChange();
 
-            if (_value == double.NaN && 
+            if (_value == double.NaN &&
                 !string.IsNullOrEmpty(_text))
             {
                 // If Text has been set, but Value hasn't, update Value based on Text.
@@ -76,15 +76,15 @@ namespace FluentAvalonia.UI.Controls
             }
         }
 
-        protected override void UpdateDataValidation<T>(AvaloniaProperty<T> property, BindingValue<T> value)
+        protected override void UpdateDataValidation(AvaloniaProperty property, BindingValueType valueType, Exception? exception)
         {
             if (property == ValueProperty)
             {
-                DataValidationErrors.SetError(this, value.Error);
+                DataValidationErrors.SetError(this, exception);
             }
         }
 
-        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
         {
             base.OnPropertyChanged(change);
             if (change.Property == IsWrapEnabledProperty)
@@ -100,18 +100,18 @@ namespace FluentAvalonia.UI.Controls
                 UpdateHeaderPresenterState();
             }
             else if (change.Property == LargeChangeProperty || change.Property == SmallChangeProperty)
-			{
+            {
                 UpdateSpinButtonEnabled();
-			}
+            }
         }
 
         protected override void OnGotFocus(GotFocusEventArgs e)
         {
             base.OnGotFocus(e);
-						
+
             if (_textBox != null)
             {
-				_textBox.SelectAll();
+                _textBox.SelectAll();
             }
 
             if (SpinButtonPlacementMode == NumberBoxSpinButtonPlacementMode.Compact)
@@ -293,7 +293,7 @@ namespace FluentAvalonia.UI.Controls
 
         private void OnNumberBoxKeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.Key) 
+            switch (e.Key)
             {
                 case Key.Enter:
                     ValidateInput();
@@ -306,7 +306,7 @@ namespace FluentAvalonia.UI.Controls
                     break;
             }
         }
-        
+
         public void StepValue(double change)
         {
             // Before adjusting the value, validate the contents of the textbox so we don't override it.
@@ -316,13 +316,13 @@ namespace FluentAvalonia.UI.Controls
             if (!double.IsNaN(newVal))
             {
                 newVal += change;
-                
+
                 if (IsWrapEnabled)
                 {
                     if (newVal > _maxmimum)
                         newVal = _minimum;
                     else if (newVal < _minimum)
-                        newVal = _maxmimum;                    
+                        newVal = _maxmimum;
                 }
 
                 Value = newVal;
@@ -346,10 +346,10 @@ namespace FluentAvalonia.UI.Controls
                 // Round to 12 digits (standard .net rounding per WinUI in the NumberBox source)
                 // We do this to prevent weirdness from floating point imprecision
                 var newValue = Math.Round(_value, 12);
-				if (SimpleNumberFormat != null)
-				{
-					newText = newValue.ToString(_simpleFormat);
-				}
+                if (SimpleNumberFormat != null)
+                {
+                    newText = newValue.ToString(_simpleFormat);
+                }
                 else if (NumberFormatter != null)
                 {
                     newText = NumberFormatter(newValue);
@@ -457,7 +457,7 @@ namespace FluentAvalonia.UI.Controls
         {
             if (_textBox != null)
             {
-                _textBox.SelectionStart = _textBox.SelectionEnd = _textBox.CaretIndex = _textBox.Text.Length;                
+                _textBox.SelectionStart = _textBox.SelectionEnd = _textBox.CaretIndex = _textBox.Text.Length;
             }
         }
 
