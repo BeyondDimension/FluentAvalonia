@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,533 +8,610 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Logging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls.Primitives;
-using AvButton = Avalonia.Controls.Button;
 
-namespace FluentAvalonia.UI.Controls
+namespace FluentAvalonia.UI.Controls;
+
+[PseudoClasses(s_pcHosted, s_pcHidden, s_pcOpen)]
+[PseudoClasses(s_pcHeader, s_pcSubheader, s_pcIcon, s_pcFooter, s_pcFooterAuto, s_pcExpanded)]
+[PseudoClasses(s_pcProgress, s_pcProgressError, s_pcProgressSuspend)]
+[TemplatePart(s_tpButtonsHost, typeof(ItemsPresenter))]
+[TemplatePart(s_tpCommandsHost, typeof(ItemsPresenter))]
+[TemplatePart(s_tpMoreDetailsButton, typeof(Button))]
+[TemplatePart(s_tpProgressBar, typeof(ProgressBar))]
+/// <summary>
+/// Represents and enhanced dialog with enhanced button, command, and progress support
+/// </summary>
+public partial class TaskDialog : ContentControl
 {
-    [PseudoClasses(":hosted", ":hidden", ":open")]
-    [PseudoClasses(":header", ":subheader", ":icon", ":footer", ":footerAuto", ":expanded")]
-    [PseudoClasses(":progress", ":progressError", ":progressSuspend")]
-    /// <summary>
-    /// Represents and enhanced dialog with enhanced button, command, and progress support
-    /// </summary>
-    public partial class TaskDialog : ContentControl
+    public TaskDialog()
     {
-        public TaskDialog()
-        {
-            PseudoClasses.Add(":hidden");
-            _buttons = new List<TaskDialogButton>();
-            _commands = new List<TaskDialogCommand>();
+        PseudoClasses.Add(s_pcHidden);
+        _buttons = new List<TaskDialogButton>();
+        _commands = new List<TaskDialogCommand>();
 
-            AddHandler(AvButton.ClickEvent, OnButtonClick, RoutingStrategies.Bubble, true);
-            AddHandler(KeyDownEvent, OnKeyDownPreview, RoutingStrategies.Tunnel, true);
+        AddHandler(Button.ClickEvent, OnButtonClick, RoutingStrategies.Bubble, true);
+        AddHandler(KeyDownEvent, OnKeyDownPreview, RoutingStrategies.Tunnel, true);
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        if (_moreDetailsButton != null)
+        {
+            _moreDetailsButton.Click -= MoreDetailsButtonClick;
         }
 
-        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        base.OnApplyTemplate(e);
+
+        _buttonsHost = e.NameScope.Get<ItemsPresenter>(s_tpButtonsHost);
+        _commandsHost = e.NameScope.Get<ItemsPresenter>(s_tpCommandsHost);
+
+        _moreDetailsButton = e.NameScope.Find<Button>(s_tpMoreDetailsButton);
+
+        _progressBar = e.NameScope.Find<ProgressBar>(s_tpProgressBar);
+
+        if (_moreDetailsButton != null)
         {
-            base.OnApplyTemplate(e);
-
-            _buttonsHost = e.NameScope.Get<ItemsPresenter>("ButtonsHost");
-            _commandsHost = e.NameScope.Get<ItemsPresenter>("CommandsHost");
-
-            _moreDetailsButton = e.NameScope.Find<AvButton>("MoreDetailsButton");
-
-            _progressBar = e.NameScope.Find<ProgressBar>("ProgressBar");
-
-            if (_moreDetailsButton != null)
-            {
-                _moreDetailsButton.Click += MoreDetailsButtonClick;
-            }
-
-            SetButtons();
-            SetCommands();
+            _moreDetailsButton.Click += MoreDetailsButtonClick;
         }
 
-        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        SetButtons();
+        SetCommands();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == FooterVisibilityProperty)
         {
-            base.OnPropertyChanged(change);
+            var val = change.GetNewValue<TaskDialogFooterVisibility>();
 
-            if (change.Property == FooterVisibilityProperty)
-            {
-                var val = change.GetNewValue<TaskDialogFooterVisibility>();
-
-                PseudoClasses.Set(":footerAuto", val == TaskDialogFooterVisibility.Auto);
-                PseudoClasses.Set(":footer", val != TaskDialogFooterVisibility.Never);
-                PseudoClasses.Set(":expanded", val == TaskDialogFooterVisibility.Always);
-            }
-            else if (change.Property == IsFooterExpandedProperty)
-            {
-                if (FooterVisibility != TaskDialogFooterVisibility.Always)
-                    PseudoClasses.Set(":expanded", change.GetNewValue<bool>());
-            }
-            else if (change.Property == ShowProgressBarProperty)
-            {
-                PseudoClasses.Set(":progress", change.GetNewValue<bool>());
-            }
-            else if (change.Property == IconSourceProperty)
-            {
-                PseudoClasses.Set(":icon", change.GetNewValue<IconSource>() != null);
-            }
-            else if (change.Property == HeaderProperty)
-            {
-                PseudoClasses.Set(":header", change.GetNewValue<string>() != null);
-            }
-            else if (change.Property == SubHeaderProperty)
-            {
-                PseudoClasses.Set(":subheader", change.GetNewValue<string>() != null);
-            }
+            PseudoClasses.Set(s_pcFooterAuto, val == TaskDialogFooterVisibility.Auto);
+            PseudoClasses.Set(s_pcFooter, val != TaskDialogFooterVisibility.Never);
+            PseudoClasses.Set(s_pcExpanded, val == TaskDialogFooterVisibility.Always);
         }
-       
-        private void OnKeyDownPreview(object sender, KeyEventArgs e)
+        else if (change.Property == IsFooterExpandedProperty)
         {
-            if (e.Key == Key.Escape)
+            if (FooterVisibility != TaskDialogFooterVisibility.Always)
+                PseudoClasses.Set(s_pcExpanded, change.GetNewValue<bool>());
+        }
+        else if (change.Property == ShowProgressBarProperty)
+        {
+            PseudoClasses.Set(s_pcProgress, change.GetNewValue<bool>());
+        }
+        else if (change.Property == IconSourceProperty)
+        {
+            PseudoClasses.Set(s_pcIcon, change.NewValue != null);
+        }
+        else if (change.Property == HeaderProperty)
+        {
+            PseudoClasses.Set(s_pcHeader, change.NewValue != null);
+        }
+        else if (change.Property == SubHeaderProperty)
+        {
+            PseudoClasses.Set(s_pcSubheader, change.NewValue != null);
+        }
+    }
+
+    private void OnKeyDownPreview(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Hide();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter)
+        {
+            if (_defaultButton != null && _defaultButton.DataContext is TaskDialogButton b)
             {
-                Hide();
+                if (b.Command?.CanExecute(b.CommandParameter) == true)
+                {
+                    b.Command.Execute(b.CommandParameter);
+                }
+
+                b.RaiseClick();
+
+                if (b is TaskDialogCommand com && !com.ClosesOnInvoked)
+                    return;
+
+                CloseCore(b.DialogResult);
                 e.Handled = true;
             }
-            else if (e.Key == Key.Enter)
+        }
+    }
+
+    /// <summary>
+    /// Shows the TaskDialog
+    /// </summary>
+    /// <param name="showHosted">Optional parameter that specifies whether this dialog should show in the OverlayLayer even on windowing platforms. Defaults to false</param>
+    /// <returns>The TaskDialog result corresponding to the command/button used to close the dialog</returns>
+    /// <remarks>
+    /// Before calling this method, you MUST set <see cref="XamlRoot"/> property to the TopLevel/Window that should
+    /// own or host this Dialog. If you declare the dialog in Xaml, this is done automatically since 
+    /// the dialog is already attached to the visual tree
+    /// </remarks>
+    public async Task<object> ShowAsync(bool showHosted = false)
+    {
+        bool declaredInXaml = ((IVisual)this).IsAttachedToVisualTree;
+        if (!declaredInXaml && XamlRoot == null)
+        {
+            throw new InvalidOperationException("XamlRoot not set on TaskDialog. This should be set to the TopLevel that should own or host the dialog.");
+        }
+
+        OnOpening();
+
+        var owner = XamlRoot ?? VisualRoot;
+
+        void UnparentDialog()
+        {
+            _xamlOwner = Parent;
+            if (_xamlOwner is Panel p)
             {
-                if (_defaultButton != null && _defaultButton.DataContext is TaskDialogButton b)
-                {
-                    if (b.Command?.CanExecute(b.CommandParameter) == true)
-                    {
-                        b.Command.Execute(b.CommandParameter);
-                    }
-
-                    b.RaiseClick();
-
-                    if (b is TaskDialogCommand com && !com.ClosesOnInvoked)
-                        return;
-
-                    CloseCore(b.DialogResult);
-                    e.Handled = true;
-                }
+                _xamlOwnerChildIndex = p.Children.IndexOf(this);
+                p.Children.RemoveAt(_xamlOwnerChildIndex);
+            }
+            else if (_xamlOwner is IContentControl icc)
+            {
+                icc.Content = null;
+            }
+            else if (_xamlOwner is IContentPresenter icp)
+            {
+                icp.Content = null;
+            }
+            else if (_xamlOwner is Decorator d)
+            {
+                d.Child = null;
             }
         }
 
-        /// <summary>
-        /// Shows the TaskDialog
-        /// </summary>
-        /// <param name="showHosted">Optional parameter that specifies whether this dialog should show in the OverlayLayer even on windowing platforms. Defaults to false</param>
-        /// <returns>The TaskDialog result corresponding to the command/button used to close the dialog</returns>
-        /// <remarks>
-        /// Before calling this method, you MUST set <see cref="XamlRoot"/> property to the TopLevel/Window that should
-        /// own or host this Dialog. If you declare the dialog in Xaml, this is done automatically since 
-        /// the dialog is already attached to the visual tree
-        /// </remarks>
-        public async Task<object> ShowAsync(bool showHosted = false)
+        object result = null;
+        _previousFocus = FocusManager.Instance?.Current;
+
+        if (showHosted || !(owner is WindowBase))
         {
-            bool declaredInXaml = ((IVisual)this).IsAttachedToVisualTree;
-            if (!declaredInXaml && XamlRoot == null)
+            // Hosted in OverlayLayer
+            _tcs = new TaskCompletionSource<object>();
+            if (declaredInXaml)
             {
-                throw new InvalidOperationException("XamlRoot not set on TaskDialog. This should be set to the TopLevel that should own or host the dialog.");
+                UnparentDialog();
             }
 
-            OnOpening();
-
-            var owner = XamlRoot ?? VisualRoot;
-
-            void UnparentDialog()
+            var host = new DialogHost
             {
-                _xamlOwner = Parent;
-                if (_xamlOwner is Panel p)
-                {
-                    _xamlOwnerChildIndex = p.Children.IndexOf(this);
-                    p.Children.RemoveAt(_xamlOwnerChildIndex);
-                }
-                else if (_xamlOwner is IContentControl icc)
-                {
-                    icc.Content = null;
-                }
-                else if (_xamlOwner is IContentPresenter icp)
-                {
-                    icp.Content = null;
-                }
-                else if (_xamlOwner is Decorator d)
-                {
-                    d.Child = null;
-                }
+                Content = this
+            };
+            _host = host;
+
+            var overlayLayer = OverlayLayer.GetOverlayLayer(owner);
+            if (overlayLayer == null)
+                throw new InvalidOperationException("Unable to find OverlayLayer for hosting the TaskDialog");
+
+            overlayLayer.Children.Add(host);
+            PseudoClasses.Set(s_pcHosted, true);
+            IsVisible = true;
+
+            // v2 - Added this so dialog materializes in the Visual Tree now since for some reason
+            //      items in the OverlayLayer materialize at the absolute last moment making init
+            //      a very difficult task to do
+            (overlayLayer.GetVisualRoot() as ILayoutRoot).LayoutManager.ExecuteInitialLayoutPass();
+
+            OnOpened();
+
+            TrySetInitialFocus();
+
+            PseudoClasses.Set(s_pcOpen, true);
+            PseudoClasses.Set(s_pcHidden, false);
+
+            result = await _tcs.Task;
+        }
+        else
+        {
+            if (declaredInXaml)
+            {
+                UnparentDialog();
             }
 
-            object result = null;
+            PseudoClasses.Set(s_pcHidden, false);
+            PseudoClasses.Set(s_pcHosted, false);
 
-            if (showHosted || !(owner is WindowBase))
+            var svc = AvaloniaLocator.Current.GetService<IFAWindowProvider>();
+            if (svc == null)
+                throw new InvalidOperationException("No window host available for TaskDialog. Be sure to reference FluentAvalonia.UI.Windowing & " +
+                    "specify .UseFAWindowing in the AppBuilder");
+
+            var host = svc.CreateTaskDialogHost(this);
+            if (_host == null)
             {
-                // Hosted in OverlayLayer
-                _tcs = new TaskCompletionSource<object>();
-                if (declaredInXaml)
-                {
-                    UnparentDialog();
-                }
-
-                var host = new DialogHost
-                {
-                    Content = this
-                };
-                _host = host;
-
-                var overlayLayer = OverlayLayer.GetOverlayLayer(owner);
-                if (overlayLayer == null)
-                    throw new InvalidOperationException("Unable to find OverlayLayer for hosting the TaskDialog");
-
-                overlayLayer.Children.Add(host);
-                PseudoClasses.Set(":hosted", true);
-                IsVisible = true;
-
-                OnOpened();
-
-                PseudoClasses.Set(":open", true);                
-                PseudoClasses.Set(":hidden", false);
-
-                result = await _tcs.Task;
-            }
-            else
-            {
-                if (declaredInXaml)
-                {
-                    UnparentDialog();
-                }
-
-                PseudoClasses.Set(":hidden", false);
-                var host = new TaskDialogWindowHost(this);
                 host[!Window.TitleProperty] = this[!TitleProperty];
                 host.Opened += (s, e) =>
                 {
                     OnOpened();
+
+                    TrySetInitialFocus();
                 };
-
-                _host = host;
-                IsVisible = true;
-
-                result = await host.ShowDialog<object>(owner as Window);
-            }
-
-            OnClosed();
-            _host = null;
-            return result ?? TaskDialogStandardResult.None;
-        }
-
-        /// <summary>
-        /// Hides the TaskDialog with a <see cref="TaskDialogStandardResult.None"/> result
-        /// </summary>
-        public void Hide()
-        {
-            CloseCore(TaskDialogStandardResult.None);
-        }
-
-        /// <summary>
-        /// Hides the dialog with the specified dialog result
-        /// </summary>
-        public void Hide(object result)
-        {
-            CloseCore(result);
-        }
-
-        internal void CompleteClosingDeferral(object result) 
-        {
-            IsEnabled = true;
-            _hasDeferralActive = false;
-            FinalCloseDialog(result);
-        }
-
-        protected virtual void OnOpening()
-        {
-            Opening?.Invoke(this, EventArgs.Empty);
-        }
-
-        protected virtual void OnOpened()
-        {
-            Opened?.Invoke(this, EventArgs.Empty);
-
-            _defaultButton?.Focus();
-        }
-
-        protected virtual void OnClosing(TaskDialogClosingEventArgs args)
-        {
-            Closing?.Invoke(this, args);
-        }
-
-        protected virtual void OnClosed()
-        {
-            Closed?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void CloseCore(object result)
-        {
-            var ea = new TaskDialogClosingEventArgs(this, result);
-            OnClosing(ea);
-
-            if (ea.Cancel)
-                return;
-
-            if (!ea.IsDeferred)
-            {
-                FinalCloseDialog(result);
-            }
-            else
-            {
-                // Diable interaction with the dialog while the deferral is active
-                IsEnabled = false;
-                _hasDeferralActive = true;
-            }
-        }
-
-        private async void FinalCloseDialog(object result)
-        {
-            void ReturnDialogToParent()
-            {
-                if (_xamlOwner == null)
-                    return;
-
-                if (_xamlOwner is Panel p)
+                host.Closing += (s, e) =>
                 {
-                    p.Children.Insert(_xamlOwnerChildIndex, this);
-                }
-                else if (_xamlOwner is Decorator d)
-                {
-                    d.Child = this;
-                }
-                else if (_xamlOwner is IContentControl icc)
-                {
-                    icc.Content = this;
-                }
-                else if (_xamlOwner is IContentPresenter icp)
-                {
-                    icp.Content = this;
-                }
-            }
-
-            if (_host is Window w)
-            {
-                // Hide the window, but don't close it while we shut down
-                // Mainly so we can take out the dialog and put it back
-                // if it was declared in Xaml and this doesn't show
-                // on screen
-                w.Hide();
-                IsVisible = false;
-
-                w.Content = null;
-                ReturnDialogToParent();
-
-                PseudoClasses.Set(":hosted", false);
-                PseudoClasses.Set(":hidden", true);
-
-                // Fully close the dialog sending the result back
-                w.Close(result);
-            }
-            else if (_host is DialogHost dh)
-            {
-                IsHitTestVisible = false;
-
-                Focus();
-
-                PseudoClasses.Set(":open", false);
-                PseudoClasses.Set(":hidden", true);
-
-                // Let the close animation finish (now 0.167s in new WinUI update...)
-                // We'll wait just a touch longer to be sure
-                await Task.Delay(200);
-
-                IsHitTestVisible = true;
-                IsVisible = false;
-
-                dh.Content = null;
-                ReturnDialogToParent();
-
-                var overlayLayer = OverlayLayer.GetOverlayLayer(dh);
-                // If OverlayLayer isn't found here, this may be a reentrant call (hit ESC multiple times quickly, etc)
-                // Don't fail, and return. If this isn't reentrant, there's bigger issues...
-                if (overlayLayer == null)
-                    return;
-
-                overlayLayer.Children.Remove(dh);
-
-                _tcs.TrySetResult(result);
-            }
-        }
-
-        private void OnButtonClick(object sender, RoutedEventArgs e)
-        {
-            // TaskDialogCommandHost is a TaskDialogButtonHost, this captures everything
-            if (e.Source is IVisual v && v.FindAncestorOfType<TaskDialogButtonHost>(true) is TaskDialogButtonHost b)
-            {
-                // DataContext for the hosts are the user defined buttons/commands, get the dialog from that
-                if (b.DataContext is TaskDialogControl tdb)
-                {
-                    if (tdb is TaskDialogCommand com && !com.ClosesOnInvoked)
+                    if (_ignoreWindowClosingEvent)
                         return;
 
-                    Hide(tdb.DialogResult);
-                }
+                    // Cancel the window event now, and we'll use our normal closing logic to determine
+                    // if we should actually cancel
+                    e.Cancel = true;
+                    CloseCore(TaskDialogStandardResult.None);
+                };
+            }            
+            
+            _host = host;
+            IsVisible = true;
+
+            result = await host.ShowDialog<object>(owner as Window);
+        }
+
+        OnClosed();
+        _host = null;
+
+        FocusManager.Instance?.Focus(_previousFocus);
+
+        return result ?? TaskDialogStandardResult.None;
+    }
+
+    /// <summary>
+    /// Hides the TaskDialog with a <see cref="TaskDialogStandardResult.None"/> result
+    /// </summary>
+    public void Hide()
+    {
+        CloseCore(TaskDialogStandardResult.None);
+    }
+
+    /// <summary>
+    /// Hides the dialog with the specified dialog result
+    /// </summary>
+    public void Hide(object result)
+    {
+        CloseCore(result);
+    }
+
+    protected virtual void OnOpening()
+    {
+        Opening?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnOpened()
+    {
+        Opened?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnClosing(TaskDialogClosingEventArgs args)
+    {
+        Closing?.Invoke(this, args);
+    }
+
+    protected virtual void OnClosed()
+    {
+        Closed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void CloseCore(object result)
+    {
+        if (_hasDeferralActive)
+            return;
+
+        var args = new TaskDialogClosingEventArgs(result);
+
+        var deferral = new Deferral(() =>
+        {
+            Dispatcher.UIThread.VerifyAccess();
+            _hasDeferralActive = false;
+            if (args.Cancel)
+                return;
+
+            FinalCloseDialog(result);
+        });
+
+        args.SetDeferral(deferral);
+
+        _hasDeferralActive = true;
+        args.IncrementDeferralCount();
+        OnClosing(args);
+        args.DecrementDeferralCount();
+    }
+
+    private async void FinalCloseDialog(object result)
+    {
+        void ReturnDialogToParent()
+        {
+            if (_xamlOwner == null)
+                return;
+
+            if (_xamlOwner is Panel p)
+            {
+                p.Children.Insert(_xamlOwnerChildIndex, this);
+            }
+            else if (_xamlOwner is Decorator d)
+            {
+                d.Child = this;
+            }
+            else if (_xamlOwner is IContentControl icc)
+            {
+                icc.Content = this;
+            }
+            else if (_xamlOwner is IContentPresenter icp)
+            {
+                icp.Content = this;
             }
         }
 
-        public void SetProgressBarState(double value, TaskDialogProgressState state)
+        if (_host is Window w)
         {
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (_progressBar != null)
-                {
-                    _progressBar.Value = value;
+            // Hide the window, but don't close it while we shut down
+            // Mainly so we can take out the dialog and put it back
+            // if it was declared in Xaml and this doesn't show
+            // on screen
+            w.Hide();
+            IsVisible = false;
 
-                    _progressBar.IsIndeterminate = (state & TaskDialogProgressState.Indeterminate) == TaskDialogProgressState.Indeterminate;
+            w.Content = null;
+            ReturnDialogToParent();
 
-                    if (_currentProgressState != state)
-                    {
-                        _currentProgressState = state;
+            PseudoClasses.Set(s_pcOpen, false);
+            PseudoClasses.Set(s_pcHidden, true);
 
-                        PseudoClasses.Set(":progressError", (state & TaskDialogProgressState.Error) == TaskDialogProgressState.Error);
-                        PseudoClasses.Set(":progressSuspend", (state & TaskDialogProgressState.Suspended) == TaskDialogProgressState.Suspended);
-                    }
-                }                
-            });
+            // Fully close the dialog sending the result back
+            _ignoreWindowClosingEvent = true;
+            w.Close(result);
+            _ignoreWindowClosingEvent = false;
         }
-
-        private void MoreDetailsButtonClick(object sender, RoutedEventArgs e)
+        else if (_host is DialogHost dh)
         {
-            IsFooterExpanded = !IsFooterExpanded;
+            IsHitTestVisible = false;
+
+            Focus();
+
+            PseudoClasses.Set(s_pcOpen, false);
+            PseudoClasses.Set(s_pcHidden, true);
+
+            // Let the close animation finish (now 0.167s in new WinUI update...)
+            // We'll wait just a touch longer to be sure
+            await Task.Delay(200);
+
+            IsHitTestVisible = true;
+            IsVisible = false;
+
+            dh.Content = null;
+            ReturnDialogToParent();
+
+            var overlayLayer = OverlayLayer.GetOverlayLayer(dh);
+            // If OverlayLayer isn't found here, this may be a reentrant call (hit ESC multiple times quickly, etc)
+            // Don't fail, and return. If this isn't reentrant, there's bigger issues...
+            if (overlayLayer == null)
+                return;
+
+            overlayLayer.Children.Remove(dh);
+
+            _tcs.TrySetResult(result);
         }
+    }
 
-        private void SetButtons()
+    private void OnButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (_hasDeferralActive)
+            return;
+
+        // TaskDialogCommandHost is a TaskDialogButtonHost, this captures everything
+        if (e.Source is IVisual v && v.FindAncestorOfType<TaskDialogButtonHost>(true) is TaskDialogButtonHost b)
         {
-            List<TaskDialogButtonHost> buttons = new List<TaskDialogButtonHost>();
-            bool foundDefault = false;
-            for (int i = 0; i < _buttons.Count; i++)
+            // DataContext for the hosts are the user defined buttons/commands, get the dialog from that
+            if (b.DataContext is TaskDialogControl tdb)
             {
-                var b = new TaskDialogButtonHost
+                if (tdb is TaskDialogCommand com && !com.ClosesOnInvoked)
+                    return;
+
+                Hide(tdb.DialogResult);
+            }
+        }
+    }
+
+    public void SetProgressBarState(double value, TaskDialogProgressState state)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_progressBar != null)
+            {
+                _progressBar.Value = value;
+
+                _progressBar.IsIndeterminate = (state & TaskDialogProgressState.Indeterminate) == TaskDialogProgressState.Indeterminate;
+
+                if (_currentProgressState != state)
                 {
-                    [!ContentProperty] = _buttons[i][!TaskDialogControl.TextProperty],
-                    [!TaskDialogButtonHost.IconSourceProperty] = _buttons[i][!TaskDialogButton.IconSourceProperty],
-                    DataContext = _buttons[i],
-                    [!IsEnabledProperty] = _buttons[i][!TaskDialogControl.IsEnabledProperty],
-                    [!AvButton.CommandParameterProperty] = _buttons[i][!TaskDialogButton.CommandParameterProperty],
-                    [!AvButton.CommandProperty] = _buttons[i][!TaskDialogButton.CommandProperty]
+                    _currentProgressState = state;
+
+                    PseudoClasses.Set(s_pcProgressError, (state & TaskDialogProgressState.Error) == TaskDialogProgressState.Error);
+                    PseudoClasses.Set(s_pcProgressSuspend, (state & TaskDialogProgressState.Suspended) == TaskDialogProgressState.Suspended);
+                }
+            }
+        });
+    }
+
+    private void MoreDetailsButtonClick(object sender, RoutedEventArgs e)
+    {
+        IsFooterExpanded = !IsFooterExpanded;
+    }
+
+    private void SetButtons()
+    {
+        List<TaskDialogButtonHost> buttons = new List<TaskDialogButtonHost>();
+        bool foundDefault = false;
+        for (int i = 0; i < _buttons.Count; i++)
+        {
+            var button = _buttons[i];
+            var b = new TaskDialogButtonHost
+            {
+                [!ContentProperty] = _buttons[i][!TaskDialogControl.TextProperty],
+                [!TaskDialogButtonHost.IconSourceProperty] = button[!TaskDialogButton.IconSourceProperty],
+                DataContext = button,
+                [!IsEnabledProperty] = button[!TaskDialogControl.IsEnabledProperty],
+                [!Button.CommandParameterProperty] = button[!TaskDialogButton.CommandParameterProperty],
+                [!Button.CommandProperty] = button[!TaskDialogButton.CommandProperty]
+            };
+
+            if (button.IsDefault)
+            {
+                if (foundDefault)
+                    throw new InvalidOperationException("Cannot set 'IsDefault' property on more than one item in a TaskDialog");
+
+                foundDefault = true;
+                b.Classes.Add(ContentDialog.s_cAccent);
+                _defaultButton = b;
+            }
+            buttons.Add(b);
+        }
+        _buttonsHost.Items = buttons;
+    }
+
+    private void SetCommands()
+    {
+        List<Control> commands = new List<Control>();
+
+        bool foundDefault = _defaultButton != null;
+        for (int i = 0; i < _commands.Count; i++)
+        {
+            if (_commands[i] is TaskDialogCheckBox tdcb)
+            {
+                var com = new CheckBox
+                {
+                    [!ContentProperty] = tdcb[!TaskDialogControl.TextProperty],
+                    DataContext = tdcb,
+                    [!IsEnabledProperty] = tdcb[!TaskDialogControl.IsEnabledProperty],
+                    [!ToggleButton.IsCheckedProperty] = tdcb[!TaskDialogRadioButton.IsCheckedProperty]
                 };
 
-                if (_buttons[i].IsDefault)
+                com.Classes.Add(s_cFATDCom);
+
+                commands.Add(com);
+            }
+            else if (_commands[i] is TaskDialogRadioButton tdrb)
+            {
+                var com = new RadioButton
+                {
+                    [!ContentProperty] = tdrb[!TaskDialogControl.TextProperty],
+                    DataContext = tdrb,
+                    [!IsEnabledProperty] = tdrb[!TaskDialogControl.IsEnabledProperty],
+                    [!ToggleButton.IsCheckedProperty] = tdrb[!TaskDialogRadioButton.IsCheckedProperty]
+                };
+
+                com.Classes.Add(s_cFATDCom);
+
+                commands.Add(com);
+            }
+            else if (_commands[i] is TaskDialogCommand tdc)
+            {
+                var com = new TaskDialogCommandHost
+                {
+                    [!ContentProperty] = tdc[!TaskDialogControl.TextProperty],
+                    DataContext = tdc,
+                    [!IsEnabledProperty] = tdc[!TaskDialogControl.IsEnabledProperty],
+                    [!Button.CommandParameterProperty] = tdc[!TaskDialogButton.CommandParameterProperty],
+                    [!Button.CommandProperty] = tdc[!TaskDialogButton.CommandProperty],
+                    [!TaskDialogButtonHost.IconSourceProperty] = tdc[!TaskDialogButton.IconSourceProperty]
+                };
+
+                if (tdc.IsDefault)
                 {
                     if (foundDefault)
                         throw new InvalidOperationException("Cannot set 'IsDefault' property on more than one item in a TaskDialog");
 
                     foundDefault = true;
-                    b.Classes.Add("accent");
-                    _defaultButton = b;
+                    com.Classes.Add(ContentDialog.s_cAccent);
+                    _defaultButton = com;
                 }
-                buttons.Add(b);
+
+                commands.Add(com);
             }
-            _buttonsHost.Items = buttons;            
         }
 
-        private void SetCommands()
-        {
-            List<Control> commands = new List<Control>();
-
-            bool foundDefault = _defaultButton != null;
-            for (int i = 0; i < _commands.Count; i++)
-            {
-                if (_commands[i] is TaskDialogCheckBox tdcb)
-                {
-                    var com = new CheckBox
-                    {
-                        [!ContentProperty] = tdcb[!TaskDialogControl.TextProperty],
-                        DataContext = tdcb,
-                        [!IsEnabledProperty] = tdcb[!TaskDialogControl.IsEnabledProperty],
-                        [!CheckBox.IsCheckedProperty] = tdcb[!TaskDialogRadioButton.IsCheckedProperty]
-                    };
-
-                    com.Classes.Add("FA_TaskDialogCommand");
-
-                    commands.Add(com);
-                }
-                else if (_commands[i] is TaskDialogRadioButton tdrb)
-                {
-                    var com = new RadioButton
-                    {
-                        [!ContentProperty] = tdrb[!TaskDialogControl.TextProperty],
-                        DataContext = tdrb,
-                        [!IsEnabledProperty] = tdrb[!TaskDialogControl.IsEnabledProperty],
-                        [!RadioButton.IsCheckedProperty] = tdrb[!TaskDialogRadioButton.IsCheckedProperty]
-                    };
-
-                    com.Classes.Add("FA_TaskDialogCommand");
-
-                    commands.Add(com);
-                }
-                else if (_commands[i] is TaskDialogCommand tdc)
-                {
-                    var com = new TaskDialogCommandHost
-                    {
-                        [!ContentProperty] = tdc[!TaskDialogControl.TextProperty],
-                        DataContext = tdc,
-                        [!IsEnabledProperty] = tdc[!TaskDialogControl.IsEnabledProperty],
-                        [!AvButton.CommandParameterProperty] = tdc[!TaskDialogButton.CommandParameterProperty],
-                        [!AvButton.CommandProperty] = tdc[!TaskDialogButton.CommandProperty],
-                        [!TaskDialogButtonHost.IconSourceProperty] = tdc[!TaskDialogButton.IconSourceProperty]
-                    };
-
-                    if (tdc.IsDefault)
-                    {
-                        if (foundDefault)
-                            throw new InvalidOperationException("Cannot set 'IsDefault' property on more than one item in a TaskDialog");
-
-                        foundDefault = true;
-                        com.Classes.Add("accent");
-                        _defaultButton = com;
-                    }
-
-                    commands.Add(com);
-                }
-            }
-
-            _commandsHost.Items = commands;
-        }
-
-        private ItemsPresenter _buttonsHost;
-        private ItemsPresenter _commandsHost;
-        private ProgressBar _progressBar;
-        private AvButton _moreDetailsButton;
-
-        private TaskDialogProgressState _currentProgressState = TaskDialogProgressState.Normal;
-
-        private AvButton _defaultButton;
-
-        public IControl _xamlOwner;
-        private int _xamlOwnerChildIndex;
-        private IControl _host;
-        private TaskCompletionSource<object> _tcs;
-        internal bool _hasDeferralActive = false;
+        _commandsHost.Items = commands;
     }
 
-    internal class TaskDialogWindowHost : CoreWindow
+    private void TrySetInitialFocus()
     {
-        public TaskDialogWindowHost(TaskDialog dialog)
+        var curFocus = FocusManager.Instance?.Current;
+        bool setFocus = false;
+        if (curFocus?.FindAncestorOfType<TaskDialog>() == null)
         {
-            CanResize = false;
-            SizeToContent = SizeToContent.WidthAndHeight;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            ShowAsDialog = true;
+            setFocus = true;
+        }
 
-            Content = dialog;
-            MinWidth = 100;
-            MinHeight = 100;
+        // User requested something to be focused, don't override their choice
+        if (!setFocus)
+            return;
 
+        // Default button gets priority focus
+        if (_defaultButton != null)
+        {
+            _defaultButton.Focus();
 #if DEBUG
-            this.AttachDevTools();
+            Logger.TryGet(LogEventLevel.Debug, "TaskDialog")?.Log("TrySetInitialFocus", "Set initial focus to requested DefaultButton");
 #endif
         }
-
-        protected override void OnClosing(CancelEventArgs e)
+        else
         {
-            base.OnClosing(e);
+            var next = KeyboardNavigationHandler.GetNext(this, NavigationDirection.Next);
+            if (next != null)
+            {
+                FocusManager.Instance.Focus(next);
+            }
+            else
+            {
+                FocusManager.Instance.Focus(this);
+            }
 
-            // Don't allow closing the window when a Deferral is active
-            // Otherwise the deferral task will continue to run, but the 
-            // window will be dismissed
-            if (Content is TaskDialog td && td._hasDeferralActive)
-                e.Cancel = true;
+#if DEBUG
+            Logger.TryGet(LogEventLevel.Debug, "TaskDialog")?.Log("TrySetInitialFocus", "Set initial focus to {next}", next);
+#endif
         }
     }
+
+    private ItemsPresenter _buttonsHost;
+    private ItemsPresenter _commandsHost;
+    private ProgressBar _progressBar;
+    private Button _moreDetailsButton;
+
+    private TaskDialogProgressState _currentProgressState = TaskDialogProgressState.Normal;
+
+    private Button _defaultButton;
+
+    public IControl _xamlOwner;
+    private int _xamlOwnerChildIndex;
+    private IControl _host;
+    private TaskCompletionSource<object> _tcs;
+    internal bool _hasDeferralActive = false;
+
+    private IInputElement _previousFocus;
+    private bool _ignoreWindowClosingEvent;
+
+    private const string s_tpButtonsHost = "ButtonsHost";
+    private const string s_tpCommandsHost = "CommandsHost";
+    private const string s_tpProgressBar = "ProgressBar";
+    private const string s_tpMoreDetailsButton = "MoreDetailsButton";
+
+    private const string s_pcHidden = ":hidden";
+    private const string s_pcOpen = ":open";
+    private const string s_pcHosted = ":hosted";
+    private const string s_pcHeader = ":header";
+    private const string s_pcSubheader = ":subheader";
+    private const string s_pcIcon = ":icon";
+    private const string s_pcFooter = ":footer";
+    private const string s_pcFooterAuto = ":footerAuto";
+    private const string s_pcExpanded = ":expanded";
+    private const string s_pcProgress = ":progress";
+    private const string s_pcProgressError = ":progressError";
+    private const string s_pcProgressSuspend = ":progressSuspend";
+
+    private const string s_cFATDCom = "FA_TaskDialogCommand";
 }

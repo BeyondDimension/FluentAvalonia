@@ -2,107 +2,107 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using System;
 
-namespace FluentAvalonia.UI.Controls
+namespace FluentAvalonia.UI.Controls;
+
+/// <summary>
+/// Represents a menu item that displays a sub-menu in a <see cref="FAMenuFlyout"/> control.
+/// </summary>
+public partial class MenuFlyoutSubItem : MenuFlyoutItemBase, IMenuItem
 {
-	/// <summary>
-	/// Represents a menu item that displays a sub-menu in a <see cref="MenuFlyout"/> control.
-	/// </summary>
-	public partial class MenuFlyoutSubItem : MenuFlyoutItemBase, IMenuItem
-	{
-        public bool StaysOpenOnClick { get; set; }
+    public MenuFlyoutSubItem()
+    {
+        _items = new AvaloniaList<object>();
+    }
 
-        public MenuFlyoutSubItem()
-		{
-			_items = new AvaloniaList<object>();
-		}
+    protected override void OnPointerEntered(PointerEventArgs e)
+    {
+        base.OnPointerEntered(e);
 
-		protected override void OnPointerEntered(PointerEventArgs e)
-		{
-			base.OnPointerEntered(e);
+        // v2 - Avalonia decided PointerEventArgs and like shouldn't be publicly constructable so our way to get around
+        //      this is to just change the event name and source and re-raise it. This isn't ideal
+        e.RoutedEvent = MenuItem.PointerEnteredItemEvent;
+        e.Source = this;
+        RaiseEvent(e);
+    }
 
-			var point = e.GetCurrentPoint(null);
-			RaiseEvent(new PointerEventArgs(MenuItem.PointerEnteredItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
-				e.Timestamp, point.Properties, e.KeyModifiers));
-		}
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
 
-		protected override void OnPointerExited(PointerEventArgs e)
-		{
-			base.OnPointerExited(e);
+        // v2 - Avalonia decided PointerEventArgs and like shouldn't be publicly constructable so our way to get around
+        //      this is to just change the event name and source and re-raise it. This isn't ideal
+        e.RoutedEvent = MenuItem.PointerExitedItemEvent;
+        e.Source = this;
+        RaiseEvent(e);
+    }
 
-			var point = e.GetCurrentPoint(null);
-			RaiseEvent(new PointerEventArgs(MenuItem.PointerExitedItemEvent, this, e.Pointer, this.VisualRoot, point.Position,
-				e.Timestamp, point.Properties, e.KeyModifiers));
-		}
+    /// <summary>
+    /// Opens the SubMenu
+    /// </summary>
+    public void Open()
+    {
+        InitPopup();
+        _subMenu.IsOpen = true;
+        _presenter.RaiseMenuOpened();
+    }
 
-		/// <summary>
-		/// Opens the SubMenu
-		/// </summary>
-		public void Open()
-		{
-			InitPopup();
-			_subMenu.IsOpen = true;
-            _presenter.RaiseMenuOpened();
-		}
+    /// <summary>
+    /// Closes the SubMenu
+    /// </summary>
+    public void Close()
+    {
+        if (_subMenu != null)
+            _subMenu.IsOpen = false;
 
-		/// <summary>
-		/// Closes the SubMenu
-		/// </summary>
-		public void Close()
-		{
-            if (_subMenu != null)
-			    _subMenu.IsOpen = false;
+        if (_presenter != null)
+        {
+            _presenter.SelectedIndex = -1;
+            _presenter.RaiseMenuClosed();
+        }
+    }
 
-            if (_presenter != null)
+    private void InitPopup()
+    {
+        if (_subMenu == null)
+        {
+            _presenter = new FAMenuFlyoutPresenter()
             {
-                _presenter.SelectedIndex = -1;
-                _presenter.RaiseMenuClosed();
-            }            
-		}
-				
-		private void InitPopup()
-		{
-			if (_subMenu == null)
-			{
-				_presenter = new MenuFlyoutPresenter()
-				{
-					[!ItemsControl.ItemsProperty] = this[!ItemsProperty],
-					[!ItemsControl.ItemTemplateProperty] = this[!ItemTemplateProperty]
-				};
+                [!ItemsControl.ItemsProperty] = this[!ItemsProperty],
+                [!ItemsControl.ItemTemplateProperty] = this[!ItemTemplateProperty]
+            };
 
-				_subMenu = new Popup
-				{
-					Child = _presenter,
-					HorizontalOffset = -4,
-					WindowManagerAddShadowHint = false,
-					PlacementMode = PlacementMode.AnchorAndGravity,
-					PlacementAnchor = Avalonia.Controls.Primitives.PopupPositioning.PopupAnchor.TopRight,
-					PlacementGravity = Avalonia.Controls.Primitives.PopupPositioning.PopupGravity.BottomRight,
-					PlacementTarget = this
-				};
+            _subMenu = new Popup
+            {
+                Child = _presenter,
+                HorizontalOffset = -4,
+                WindowManagerAddShadowHint = false,
+                PlacementMode = PlacementMode.AnchorAndGravity,
+                PlacementAnchor = Avalonia.Controls.Primitives.PopupPositioning.PopupAnchor.TopRight,
+                PlacementGravity = Avalonia.Controls.Primitives.PopupPositioning.PopupGravity.BottomRight,
+                PlacementTarget = this
+            };
 
-				LogicalChildren.Add(_subMenu);
+            LogicalChildren.Add(_subMenu);
 
-				_subMenu.Opened += OnPopupOpen;
-				_subMenu.Closed += OnPopupClose;
-			}
-		}
+            _subMenu.Opened += OnPopupOpen;
+            _subMenu.Closed += OnPopupClose;
+        }
+    }
 
-		private void OnPopupOpen(object sender, EventArgs e)
-		{
-			PseudoClasses.Set(":submenuopen", true);
-		}
+    private void OnPopupOpen(object sender, EventArgs e)
+    {
+        PseudoClasses.Set(":submenuopen", true);
+    }
 
-		private void OnPopupClose(object sender, EventArgs e)
-		{
-			PseudoClasses.Set(":submenuopen", false);
-		}
+    private void OnPopupClose(object sender, EventArgs e)
+    {
+        PseudoClasses.Set(":submenuopen", false);
+    }
 
-        bool IMenuElement.MoveSelection(NavigationDirection direction, bool wrap) => false;
-		
-		private Popup _subMenu;
-		private MenuFlyoutPresenter _presenter;
-	}
+    bool IMenuElement.MoveSelection(NavigationDirection direction, bool wrap) => false;
+
+    private Popup _subMenu;
+    private FAMenuFlyoutPresenter _presenter;
 }

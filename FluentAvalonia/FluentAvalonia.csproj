@@ -19,20 +19,46 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\*.*" />
-    <AvaloniaResource Include="Fonts\*.*" />
-    <AvaloniaResource Include="Styling\StylesV2\Controls.txt" />
-  </ItemGroup>
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Version>2.0.0-preview4</Version>
+        <AssemblyVersion>2.0.0.0</AssemblyVersion>        
+    </PropertyGroup>
+
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\*.*" />
+	    <AvaloniaResource Include="Fonts\*.*" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Assets\ControlStrings.json" />
+    </ItemGroup>
+
+	<ItemGroup>
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="Avalonia.Desktop" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" />
+        <PackageReference Include="MicroCom.CodeGenerator.MSBuild" />
+        <PackageReference Include="MicroCom.Runtime" />
+        <MicroComIdl Include="$(MSBuildThisFileDirectory)\Interop\WinRT\WinRT.idl" CSharpInteropPath="$(MSBuildThisFileDirectory)\Interop\WinRT\WinRT.Generated.cs" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+        <PackageReference Include="System.Text.Json" Version="6.0.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+        <PackageReference Include="System.Text.Json" Version="6.0.5" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
+	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" />
-    <PackageReference Include="MicroCom.CodeGenerator.MSBuild" />
-    <PackageReference Include="MicroCom.Runtime" />
-    <MicroComIdl Include="$(MSBuildThisFileDirectory)\Interop\WinRT\WinRT.idl" CSharpInteropPath="$(MSBuildThisFileDirectory)\Interop\WinRT\WinRT.Generated.cs" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <InternalsVisibleTo Include="FluentAvalonia.UI.Windowing" />
   </ItemGroup>
 </Project>

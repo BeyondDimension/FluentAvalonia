@@ -1,67 +1,65 @@
 ﻿using System;
+using Avalonia.Threading;
+using FluentAvalonia.Core;
 
-namespace FluentAvalonia.UI.Controls
+namespace FluentAvalonia.UI.Controls;
+
+/// <summary>
+/// Provides data for the closing event.
+/// </summary>
+public class TaskDialogClosingEventArgs : EventArgs
 {
-    /// <summary>
-    /// Provides data for the closing event.
-    /// </summary>
-    public class TaskDialogClosingEventArgs : EventArgs
+    internal TaskDialogClosingEventArgs(object res)
     {
-        internal TaskDialogClosingEventArgs(TaskDialog owner, object res)
-        {
-            Result = res;
-            _owner = owner;
-        }
-
-        /// <summary>
-        /// Gets or sets a value that can cancel the closing of the dialog.
-        /// A true value for Cancel cancels the default behavior.
-        /// </summary>
-        public bool Cancel { get; set; }
-
-        /// <summary>
-        /// Gets the result of the closing event.
-        /// </summary>
-        public object Result { get; }
-
-        internal bool IsDeferred => _deferral != null;
-
-        /// <summary>
-        /// Gets a <see cref="TaskDialogClosingDeferral"/> that the app can use to 
-        /// respond asynchronously to the closing event.
-        /// </summary>
-        /// <returns></returns>
-        public TaskDialogClosingDeferral GetDeferral()
-        {
-            _deferral = new TaskDialogClosingDeferral(_owner, Result);
-            return _deferral;
-        }
-
-        private TaskDialog _owner;
-        private TaskDialogClosingDeferral _deferral;
+        Result = res;
     }
 
     /// <summary>
-    /// Represents a deferral that can be used by an app to respond asyncronously to
-    /// a <see cref="TaskDialog"/> closing
+    /// Gets or sets a value that can cancel the closing of the dialog.
+    /// A true value for Cancel cancels the default behavior.
     /// </summary>
-    public class TaskDialogClosingDeferral
+    public bool Cancel { get; set; }
+
+    /// <summary>
+    /// Gets the result of the closing event.
+    /// </summary>
+    public object Result { get; }
+
+    /// <summary>
+    /// Gets a <see cref="Deferral"/> that the app can use to 
+    /// respond asynchronously to the closing event.
+    /// </summary>
+    /// <returns></returns>
+    public Deferral GetDeferral()
     {
-        internal TaskDialogClosingDeferral(TaskDialog owner, object result)
-        {
-            _owner = owner;
-            _result = result;
-        }
+        _deferralCount++;
 
-        /// <summary>
-        /// Notifies the system that the app has finished processing the closing event.
-        /// </summary>
-        public void Complete()
+        return new Deferral(() =>
         {
-            _owner.CompleteClosingDeferral(_result);
-        }
-
-        private TaskDialog _owner;
-        private object _result;
+            Dispatcher.UIThread.VerifyAccess();
+            DecrementDeferralCount();
+        });
     }
+
+    internal void SetDeferral(Deferral deferral)
+    {
+        _deferral = deferral;
+    }
+
+    internal void IncrementDeferralCount()
+    {
+        _deferralCount++;
+    }
+
+    internal void DecrementDeferralCount()
+    {
+        _deferralCount--;
+        if (_deferralCount == 0)
+        {
+            _deferral.Complete();
+        }
+    }
+
+    private Deferral _deferral;
+    private int _deferralCount;
 }

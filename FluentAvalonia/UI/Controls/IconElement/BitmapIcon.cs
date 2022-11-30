@@ -6,65 +6,71 @@ using Avalonia.Skia;
 using SkiaSharp;
 using System;
 
-namespace FluentAvalonia.UI.Controls
+namespace FluentAvalonia.UI.Controls;
+
+public partial class BitmapIcon : FAIconElement
 {
-    public partial class BitmapIcon : IconElement
+    ~BitmapIcon()
     {
-        ~BitmapIcon()
-        {
-            Dispose();
-            UnlinkFromBitmapIconSource();
-        }
+        Dispose();
+        UnlinkFromBitmapIconSource();
+    }
 
-        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-        {
-            base.OnPropertyChanged(change);
-            if (change.Property == UriSourceProperty)
-            {
-                if (_bis != null)
-                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
-
-                CreateBitmap(change.GetNewValue<Uri>());
-                InvalidateVisual();
-            }
-            else if (change.Property == ShowAsMonochromeProperty)
-            {
-                if (_bis != null)
-                    throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
-
-                InvalidateVisual();
-            }
-        }
-
-        protected override Size MeasureOverride(Size availableSize)
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == UriSourceProperty)
         {
             if (_bis != null)
-                return _originalSize;
+                throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-            if (_bitmap == null || UriSource == null)
-                return base.MeasureOverride(availableSize);
-
-            return _originalSize;
+            CreateBitmap(change.GetNewValue<Uri>());
+            InvalidateVisual();
         }
-
-        public override void Render(DrawingContext context)
+        else if (change.Property == ShowAsMonochromeProperty)
         {
-            if (_bitmap == null && _bis == null)
-                return;
+            if (_bis != null)
+                throw new InvalidOperationException("Cannot edit properties of BitmapIcon if BitmapIconSource is linked");
 
-            var dst = new Rect(Bounds.Size);
+            InvalidateVisual();
+        }
+    }
 
-            // RTB will throw ArgumentException if height or width isn't at least 1, so
-            // don't draw anything if we don't meet that requirement
-            if (dst.Width < 1 || dst.Height < 1)
-                return;
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        if (_bis != null)
+            return _originalSize;
 
-            var wid = (int)dst.Width;
-            var hei = (int)dst.Height;
+        if (_bitmap == null || UriSource == null)
+            return base.MeasureOverride(availableSize);
 
-            using var bmp = new RenderTargetBitmap(new PixelSize(wid, hei));
-            var ctx = bmp.CreateDrawingContext(null);
-            var skDC = ctx.GetFeature<ISkiaSharpApiLeaseFeature>().Lease().SkCanvas;
+        return _originalSize;
+    }
+
+    public override void Render(DrawingContext context)
+    {
+        if (_bitmap == null && _bis == null)
+            return;
+
+        var dst = new Rect(Bounds.Size);
+
+        // RTB will throw ArgumentException if height or width isn't at least 1, so
+        // don't draw anything if we don't meet that requirement
+        if (dst.Width < 1 || dst.Height < 1)
+            return;
+
+        var wid = (int)dst.Width;
+        var hei = (int)dst.Height;
+
+        using (var bmp = new RenderTargetBitmap(new PixelSize(wid, hei)))
+        using (var ctx = bmp.CreateDrawingContext(null))
+        {
+            var feat = ctx.GetFeature<ISkiaSharpApiLeaseFeature>();
+            if (feat == null)
+                throw new Exception("BitmapIcon requires SkiaSharp to be rendering backend");
+            using var lease = feat.Lease();
+            var skDC = lease.SkCanvas;
+
             skDC.Clear(new SKColor(0, 0, 0, 0));
 
             var finalBmp = _bitmap.Resize(new SKImageInfo(wid, hei), SKFilterQuality.High);
@@ -91,65 +97,64 @@ namespace FluentAvalonia.UI.Controls
             {
                 context.DrawImage(bmp, new Rect(bmp.Size), dst, BitmapInterpolationMode.HighQuality);
             }
-
         }
-
-        private void CreateBitmap(Uri src)
-        {
-            if (_bis != null)
-                return;
-
-            Dispose();
-
-            if (src == null)
-                return;
-
-            if (src.IsAbsoluteUri && src.IsFile)
-            {
-                _bitmap = SKBitmap.Decode(src.LocalPath);
-            }
-            else
-            {
-                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                _bitmap = SKBitmap.Decode(assets.Open(src));
-            }
-            _originalSize = new Size(_bitmap.Width, _bitmap.Height);
-        }
-
-        protected void Dispose()
-        {
-            _bitmap?.Dispose();
-            _bitmap = null;
-            _originalSize = Size.Empty;
-        }
-
-        internal void LinkToBitmapIconSource(BitmapIconSource bis)
-        {
-            if (bis == null)
-                throw new ArgumentNullException("BitmapIconSource", "BitmapIconSource cannot be null");
-
-            _bis = bis;
-            OnLinkedBitmapIconSourceChanged(null, null);
-            bis.OnBitmapChanged += OnLinkedBitmapIconSourceChanged;
-        }
-
-        internal void UnlinkFromBitmapIconSource()
-        {
-            if (_bis != null)
-                _bis.OnBitmapChanged -= OnLinkedBitmapIconSourceChanged;
-
-            _bis = null;
-        }
-
-        private void OnLinkedBitmapIconSourceChanged(object sender, object e)
-        {
-            Dispose();
-            _bitmap = _bis._bitmap;
-            _originalSize = _bis.Size;
-        }
-
-        private BitmapIconSource _bis;
-        protected SKBitmap _bitmap;
-        private Size _originalSize;
     }
+
+    private void CreateBitmap(Uri src)
+    {
+        if (_bis != null)
+            return;
+
+        Dispose();
+
+        if (src == null)
+            return;
+
+        if (src.IsAbsoluteUri && src.IsFile)
+        {
+            _bitmap = SKBitmap.Decode(src.LocalPath);
+        }
+        else
+        {
+            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            _bitmap = SKBitmap.Decode(assets.Open(src));
+        }
+        _originalSize = new Size(_bitmap.Width, _bitmap.Height);
+    }
+
+    protected void Dispose()
+    {
+        _bitmap?.Dispose();
+        _bitmap = null;
+        _originalSize = Size.Empty;
+    }
+
+    internal void LinkToBitmapIconSource(BitmapIconSource bis)
+    {
+        if (bis == null)
+            throw new ArgumentNullException("BitmapIconSource", "BitmapIconSource cannot be null");
+
+        _bis = bis;
+        OnLinkedBitmapIconSourceChanged(null, null);
+        bis.OnBitmapChanged += OnLinkedBitmapIconSourceChanged;
+    }
+
+    internal void UnlinkFromBitmapIconSource()
+    {
+        if (_bis != null)
+            _bis.OnBitmapChanged -= OnLinkedBitmapIconSourceChanged;
+
+        _bis = null;
+    }
+
+    private void OnLinkedBitmapIconSourceChanged(object sender, object e)
+    {
+        Dispose();
+        _bitmap = _bis._bitmap;
+        _originalSize = _bis.Size;
+    }
+
+    private BitmapIconSource _bis;
+    protected SKBitmap _bitmap;
+    private Size _originalSize;
 }

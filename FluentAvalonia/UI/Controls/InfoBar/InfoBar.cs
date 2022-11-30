@@ -1,211 +1,213 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using System;
 
-namespace FluentAvalonia.UI.Controls
+namespace FluentAvalonia.UI.Controls;
+
+public partial class InfoBar : ContentControl
 {
-	public partial class InfoBar : ContentControl
-	{
-		protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-		{
-			_appliedTemplate = false;
-			if (_closeButton != null)
-			{
-				_closeButton.Click -= OnCloseButtonClick;
-			}
+    private const string SR_InfoBarCloseButtonTooltip = "InfoBarCloseButtonTooltip";
 
-			base.OnApplyTemplate(e);
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        _appliedTemplate = false;
+        if (_closeButton != null)
+        {
+            _closeButton.Click -= OnCloseButtonClick;
+        }
 
-			_closeButton = e.NameScope.Find<Button>("CloseButton");
-			if (_closeButton != null)
-			{
-				_closeButton.Click += OnCloseButtonClick;
+        base.OnApplyTemplate(e);
 
-				ToolTip.SetTip(_closeButton, "Close");
-			}
+        _closeButton = e.NameScope.Find<Button>("CloseButton");
+        if (_closeButton != null)
+        {
+            _closeButton.Click += OnCloseButtonClick;
 
-			_appliedTemplate = true;
+            ToolTip.SetTip(_closeButton, FALocalizationHelper.Instance.GetLocalizedStringResource(SR_InfoBarCloseButtonTooltip));
+        }
 
-			UpdateVisibility(_notifyOpen, true);
-			_notifyOpen = false;
+        _appliedTemplate = true;
 
-			UpdateSeverity();
-			UpdateIcon();
-			UpdateIconVisibility();
-			UpdateCloseButton();
-			UpdateForeground();
-		}
+        UpdateVisibility(_notifyOpen, true);
+        _notifyOpen = false;
 
-		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-		{
-			base.OnPropertyChanged(change);
-			if (change.Property == IsOpenProperty)
-			{
-				if (change.GetNewValue<bool>())
-				{
-					_lastCloseReason = InfoBarCloseReason.Programmatic;
-					UpdateVisibility();
-				}
-				else
-				{
-					RaiseClosingEvent();
-				}
-			}
-			else if (change.Property == SeverityProperty)
-			{
-				UpdateSeverity();
-			}
-			else if (change.Property == IconSourceProperty)
-			{
-				UpdateIcon();
-				UpdateIconVisibility();
-			}
-			else if (change.Property == IsIconVisibleProperty)
-			{
-				UpdateIconVisibility();
-			}
-			else if (change.Property == IsClosableProperty)
-			{
-				UpdateCloseButton();
-			}
-			else if (change.Property == TextBlock.ForegroundProperty)
-			{
-				UpdateForeground();
-			}
-		}
+        UpdateSeverity();
+        UpdateIcon();
+        UpdateIconVisibility();
+        UpdateCloseButton();
+        UpdateForeground();
+    }
 
-		private void OnCloseButtonClick(object sender, RoutedEventArgs e)
-		{
-			CloseButtonClick?.Invoke(this, EventArgs.Empty);
-			_lastCloseReason = InfoBarCloseReason.CloseButton;
-			IsOpen = false;
-		}
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == IsOpenProperty)
+        {
+            if (change.GetNewValue<bool>())
+            {
+                _lastCloseReason = InfoBarCloseReason.Programmatic;
+                UpdateVisibility();
+            }
+            else
+            {
+                RaiseClosingEvent();
+            }
+        }
+        else if (change.Property == SeverityProperty)
+        {
+            UpdateSeverity();
+        }
+        else if (change.Property == IconSourceProperty)
+        {
+            UpdateIcon();
+            UpdateIconVisibility();
+        }
+        else if (change.Property == IsIconVisibleProperty)
+        {
+            UpdateIconVisibility();
+        }
+        else if (change.Property == IsClosableProperty)
+        {
+            UpdateCloseButton();
+        }
+        else if (change.Property == TextElement.ForegroundProperty)
+        {
+            UpdateForeground();
+        }
+    }
 
-		private void RaiseClosingEvent()
-		{
-			var args = new InfoBarClosingEventArgs(_lastCloseReason);
+    private void OnCloseButtonClick(object sender, RoutedEventArgs e)
+    {
+        CloseButtonClick?.Invoke(this, EventArgs.Empty);
+        _lastCloseReason = InfoBarCloseReason.CloseButton;
+        IsOpen = false;
+    }
 
-			Closing?.Invoke(this, args);
+    private void RaiseClosingEvent()
+    {
+        var args = new InfoBarClosingEventArgs(_lastCloseReason);
 
-			if (!args.Cancel)
-			{
-				UpdateVisibility();
-				RaiseClosedEvent();
-			}
-			else
-			{
-				// The developer has changed the Cancel property to true,
-				// so we need to revert the IsOpen property to true.
-				IsOpen = true;
-			}
-		}
+        Closing?.Invoke(this, args);
 
-		private void RaiseClosedEvent()
-		{
-			var args = new InfoBarClosedEventArgs(_lastCloseReason);
-			Closed?.Invoke(this, args);
-		}
+        if (!args.Cancel)
+        {
+            UpdateVisibility();
+            RaiseClosedEvent();
+        }
+        else
+        {
+            // The developer has changed the Cancel property to true,
+            // so we need to revert the IsOpen property to true.
+            IsOpen = true;
+        }
+    }
 
-		private void UpdateVisibility(bool notify = true, bool force = true)
-		{
-			if (!_appliedTemplate)
-			{
-				_notifyOpen = true;
-			}
-			else
-			{
-				if (force || IsOpen != _isVisible)
-				{
-					if (IsOpen)
-					{
-						_isVisible = true;
-						PseudoClasses.Set(":hidden", false);
-					}
-					else
-					{
-						_isVisible = false;
-						PseudoClasses.Set(":hidden", true);
-					}
-				}
-			}
-		}
+    private void RaiseClosedEvent()
+    {
+        var args = new InfoBarClosedEventArgs(_lastCloseReason);
+        Closed?.Invoke(this, args);
+    }
 
-		private void UpdateSeverity()
-		{
-			if (!_appliedTemplate)
-				return; //Template not applied yet
+    private void UpdateVisibility(bool notify = true, bool force = true)
+    {
+        if (!_appliedTemplate)
+        {
+            _notifyOpen = true;
+        }
+        else
+        {
+            if (force || IsOpen != _isVisible)
+            {
+                if (IsOpen)
+                {
+                    _isVisible = true;
+                    PseudoClasses.Set(":hidden", false);
+                }
+                else
+                {
+                    _isVisible = false;
+                    PseudoClasses.Set(":hidden", true);
+                }
+            }
+        }
+    }
 
-			switch (Severity)
-			{
-				case InfoBarSeverity.Success:
-					PseudoClasses.Set(":success", true);
-					PseudoClasses.Set(":warning", false);
-					PseudoClasses.Set(":error", false);
-					PseudoClasses.Set(":informational", false);
-					break;
+    private void UpdateSeverity()
+    {
+        if (!_appliedTemplate)
+            return; //Template not applied yet
 
-				case InfoBarSeverity.Warning:
-					PseudoClasses.Set(":success", false);
-					PseudoClasses.Set(":warning", true);
-					PseudoClasses.Set(":error", false);
-					PseudoClasses.Set(":informational", false);
-					break;
+        switch (Severity)
+        {
+            case InfoBarSeverity.Success:
+                PseudoClasses.Set(":success", true);
+                PseudoClasses.Set(":warning", false);
+                PseudoClasses.Set(":error", false);
+                PseudoClasses.Set(":informational", false);
+                break;
 
-				case InfoBarSeverity.Error:
-					PseudoClasses.Set(":success", false);
-					PseudoClasses.Set(":warning", false);
-					PseudoClasses.Set(":error", true);
-					PseudoClasses.Set(":informational", false);
-					break;
+            case InfoBarSeverity.Warning:
+                PseudoClasses.Set(":success", false);
+                PseudoClasses.Set(":warning", true);
+                PseudoClasses.Set(":error", false);
+                PseudoClasses.Set(":informational", false);
+                break;
 
-				default: // default to informational
-					PseudoClasses.Set(":success", false);
-					PseudoClasses.Set(":warning", false);
-					PseudoClasses.Set(":error", false);
-					PseudoClasses.Set(":informational", true);
-					break;
-			}
-		}
+            case InfoBarSeverity.Error:
+                PseudoClasses.Set(":success", false);
+                PseudoClasses.Set(":warning", false);
+                PseudoClasses.Set(":error", true);
+                PseudoClasses.Set(":informational", false);
+                break;
 
-		private void UpdateIcon()
-		{
-			// Skip this logic - used an IconSourceElement in the template instead
-			// which automatically handles IconSource -> IconElement for us
-		}
+            default: // default to informational
+                PseudoClasses.Set(":success", false);
+                PseudoClasses.Set(":warning", false);
+                PseudoClasses.Set(":error", false);
+                PseudoClasses.Set(":informational", true);
+                break;
+        }
+    }
 
-		private void UpdateIconVisibility()
-		{
-			if (!IsIconVisible)
-			{
-				PseudoClasses.Set(":icon", false);
-				PseudoClasses.Set(":standardIcon", false);
-			}
-			else
-			{
-				bool hasUserIcon = IconSource != null;
-				PseudoClasses.Set(":icon", hasUserIcon);
-				PseudoClasses.Set(":standardIcon", !hasUserIcon);
-			}			
-		}
+    private void UpdateIcon()
+    {
+        // Skip this logic - used an IconSourceElement in the template instead
+        // which automatically handles IconSource -> IconElement for us
+    }
 
-		private void UpdateCloseButton()
-		{
-			PseudoClasses.Set(":closehidden", !IsClosable);
-		}
+    private void UpdateIconVisibility()
+    {
+        if (!IsIconVisible)
+        {
+            PseudoClasses.Set(":icon", false);
+            PseudoClasses.Set(":standardIcon", false);
+        }
+        else
+        {
+            bool hasUserIcon = IconSource != null;
+            PseudoClasses.Set(":icon", hasUserIcon);
+            PseudoClasses.Set(":standardIcon", !hasUserIcon);
+        }
+    }
 
-		private void UpdateForeground()
-		{
-			PseudoClasses.Set(":foregroundset", this.GetValue(TextBlock.ForegroundProperty) != AvaloniaProperty.UnsetValue);
-		}
+    private void UpdateCloseButton()
+    {
+        PseudoClasses.Set(":closehidden", !IsClosable);
+    }
 
-		private Button _closeButton;
+    private void UpdateForeground()
+    {
+        PseudoClasses.Set(":foregroundset", this.GetValue(TextElement.ForegroundProperty) != AvaloniaProperty.UnsetValue);
+    }
 
-		private bool _appliedTemplate;
-		private bool _notifyOpen;
-		private bool _isVisible;
+    private Button _closeButton;
 
-		private InfoBarCloseReason _lastCloseReason;
-	}
+    private bool _appliedTemplate;
+    private bool _notifyOpen;
+    private bool _isVisible;
+
+    private InfoBarCloseReason _lastCloseReason;
 }

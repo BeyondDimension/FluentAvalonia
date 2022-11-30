@@ -18,6 +18,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\FluentAvalonia.UI.Windowing\FluentAvalonia.UI.Windowing.csproj" />
     <ProjectReference Include="..\FluentAvalonia\FluentAvalonia.csproj" />
   </ItemGroup>
 </Project>
